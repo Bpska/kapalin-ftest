@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import BookCard from '@/components/BookCard';
-import ThemeToggle from '@/components/ThemeToggle';
 import { booksData } from '@/data/books';
 
 const Home = () => {
@@ -16,16 +15,13 @@ const Home = () => {
   return (
     <div className="px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pt-4 mb-6">
-        <div className="text-center flex-1">
-          <h1 className="font-serif text-3xl font-bold text-sage-brown mb-2">
-            Kapalin Gita Tales
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Ancient wisdom for young minds
-          </p>
-        </div>
-        <ThemeToggle />
+      <div className="text-center pt-4">
+        <h1 className="font-serif text-3xl font-bold text-sage-brown mb-2">
+          Kapalin Gita Tales
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Ancient wisdom for young minds
+        </p>
       </div>
 
       {/* Search Bar */}
