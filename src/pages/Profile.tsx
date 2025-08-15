@@ -1,8 +1,11 @@
 import { User, Package, CreditCard, MapPin, HelpCircle, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Profile = () => {
+  const { user } = useAuth();
+  
   const profileSections = [
     {
       icon: Package,
@@ -54,12 +57,12 @@ const Profile = () => {
           <Avatar className="h-16 w-16">
             <AvatarImage src="/placeholder-user.jpg" />
             <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg font-medium">
-              KG
+              {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Arjun Sharma</h2>
-            <p className="text-muted-foreground">arjun@example.com</p>
+            <h2 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h2>
+            <p className="text-muted-foreground">{user?.email || 'user@example.com'}</p>
             <p className="text-sm text-muted-foreground mt-1">Member since Jan 2024</p>
           </div>
         </div>
