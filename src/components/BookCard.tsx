@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Book, useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import LoginPrompt from '@/components/LoginPrompt';
 
 interface BookCardProps {
   book: Book;
@@ -12,9 +15,17 @@ interface BookCardProps {
 const BookCard = ({ book }: BookCardProps) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    
     addToCart(book);
     toast({
       title: "Added to Cart!",
@@ -74,6 +85,12 @@ const BookCard = ({ book }: BookCardProps) => {
           </div>
         </div>
       </div>
+      
+      <LoginPrompt
+        open={showLoginPrompt}
+        onOpenChange={setShowLoginPrompt}
+        feature="add items to cart"
+      />
     </Card>
   );
 };

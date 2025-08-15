@@ -1,16 +1,22 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { booksData } from '@/data/books';
 import { toast } from '@/components/ui/use-toast';
+import LoginPrompt from '@/components/LoginPrompt';
 
 const BookDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [loginPromptFeature, setLoginPromptFeature] = useState('');
 
   const book = booksData.find(b => b.id === id);
 
@@ -24,11 +30,27 @@ const BookDetail = () => {
   }
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      setLoginPromptFeature('add items to cart');
+      setShowLoginPrompt(true);
+      return;
+    }
+    
     addToCart(book);
     toast({
       title: "Added to Cart!",
       description: `${book.title} has been added to your cart.`,
     });
+  };
+
+  const handleViewSamplePages = () => {
+    if (!isAuthenticated) {
+      setLoginPromptFeature('view sample pages');
+      setShowLoginPrompt(true);
+      return;
+    }
+    // Sample pages are already visible, so we don't need additional logic here
+    // This function is just for the authentication check
   };
 
   return (
@@ -87,25 +109,57 @@ const BookDetail = () => {
 
       {/* Sample Pages */}
       <Card className="p-6 shadow-soft border-border">
-        <h3 className="font-serif text-lg font-semibold text-sage-brown mb-4">
-          Sample Pages
-        </h3>
-        <Carousel className="w-full">
-          <CarouselContent>
-            {book.samplePages.map((page, index) => (
-              <CarouselItem key={index}>
-                <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-soft">
-                  <img
-                    src={page}
-                    alt={`Sample page ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-serif text-lg font-semibold text-sage-brown">
+            Sample Pages
+          </h3>
+          {!isAuthenticated && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewSamplePages}
+            >
+              Login to View
+            </Button>
+          )}
+        </div>
+        
+        {isAuthenticated ? (
+          <Carousel className="w-full">
+            <CarouselContent>
+              {book.samplePages.map((page, index) => (
+                <CarouselItem key={index}>
+                  <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-soft">
+                    <img
+                      src={page}
+                      alt={`Sample page ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <div 
+            className="aspect-[3/4] rounded-xl overflow-hidden shadow-soft bg-muted flex items-center justify-center cursor-pointer"
+            onClick={handleViewSamplePages}
+          >
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2">Sample pages available</p>
+              <Button variant="outline" size="sm">
+                Login to View
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
+      
+      <LoginPrompt
+        open={showLoginPrompt}
+        onOpenChange={setShowLoginPrompt}
+        feature={loginPromptFeature}
+      />
     </div>
   );
 };
