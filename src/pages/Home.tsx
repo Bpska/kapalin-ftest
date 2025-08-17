@@ -23,19 +23,25 @@ interface Book {
 }
 
 const Home = () => {
+  console.log('Home component mounting');
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Home useEffect triggered');
     const fetchBook = async () => {
+      console.log('fetchBook started');
       try {
+        console.log('Making Supabase query for book');
         const { data, error } = await supabase
           .from('books')
           .select('*')
           .limit(1)
           .maybeSingle();
+
+        console.log('Supabase query result:', { data, error });
 
         if (error && error.code !== 'PGRST116') {
           throw error;
@@ -45,6 +51,7 @@ const Home = () => {
           // Use local image if image_url is not a valid URL
           const imageUrl = data.image_url && data.image_url.startsWith('http') ? data.image_url : bgCover;
           setBook({...data, image_url: imageUrl});
+          console.log('Set book from database:', {...data, image_url: imageUrl});
         } else {
           // If no book in database, create a default book object using local image
           setBook({
@@ -60,6 +67,7 @@ const Home = () => {
             category: 'Spiritual Literature',
             content_preview: 'Discover the eternal teachings of Krishna through colorful illustrations and simple stories that will inspire and guide young minds on their spiritual journey.'
           });
+          console.log('Set default book (no data found)');
         }
       } catch (error) {
         console.error('Error fetching book:', error);
@@ -77,7 +85,9 @@ const Home = () => {
           category: 'Spiritual Literature',
           content_preview: 'Discover the eternal teachings of Krishna through colorful illustrations and simple stories that will inspire and guide young minds on their spiritual journey.'
         });
+        console.log('Set default book due to catch error');
       } finally {
+        console.log('fetchBook completed, setting loading to false');
         setIsLoading(false);
       }
     };

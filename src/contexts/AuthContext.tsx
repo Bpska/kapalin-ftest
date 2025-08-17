@@ -31,44 +31,74 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthContext useEffect triggered');
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile from Supabase
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          
-          setUser({
-            id: session.user.id,
-            name: profile?.name || session.user.email?.split('@')[0] || '',
-            email: session.user.email || '',
-            phoneNumber: profile?.phone || undefined,
-            bio: profile?.bio || undefined,
-            photoURL: profile?.avatar_url || undefined,
-            createdAt: profile?.created_at ? new Date(profile.created_at) : new Date(),
-            updatedAt: profile?.updated_at ? new Date(profile.updated_at) : new Date()
-          });
+          // Defer profile fetch to avoid blocking auth state changes
+          setTimeout(async () => {
+            try {
+              console.log('Fetching user profile for:', session.user.id);
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              if (error) {
+                console.error('Profile fetch error:', error);
+              }
+              
+              console.log('Profile fetch result:', profile);
+              
+              setUser({
+                id: session.user.id,
+                name: profile?.name || session.user.email?.split('@')[0] || '',
+                email: session.user.email || '',
+                phoneNumber: profile?.phone || undefined,
+                bio: profile?.bio || undefined,
+                photoURL: profile?.avatar_url || undefined,
+                createdAt: profile?.created_at ? new Date(profile.created_at) : new Date(),
+                updatedAt: profile?.updated_at ? new Date(profile.updated_at) : new Date()
+              });
+              console.log('User state updated');
+            } catch (error) {
+              console.error('Error fetching profile:', error);
+              // Set basic user info even if profile fetch fails
+              setUser({
+                id: session.user.id,
+                name: session.user.email?.split('@')[0] || '',
+                email: session.user.email || '',
+              });
+            }
+          }, 0);
         } else {
           setUser(null);
+          console.log('User logged out');
         }
         setLoading(false);
+        console.log('Auth loading set to false');
       }
     );
 
     // Check for existing session
+    console.log('Checking for existing session');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Existing session check result:', session?.user?.id);
       if (session) {
         setSession(session);
         // The auth state change listener will handle user profile fetching
       } else {
         setLoading(false);
+        console.log('No existing session, loading set to false');
       }
+    }).catch((error) => {
+      console.error('Error checking session:', error);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
