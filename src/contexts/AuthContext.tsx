@@ -1,80 +1,194 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+  ConfirmationResult,
+  signInWithCredential,
+  PhoneAuthProvider
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { PhoneAuthService } from '@/lib/phoneAuth';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  photoURL?: string;
+  phoneNumber?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, phoneNumber?: string) => Promise<void>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
+  sendPhoneOTP: (phoneNumber: string) => Promise<ConfirmationResult>;
+  verifyPhoneOTP: (confirmationResult: ConfirmationResult, otp: string) => Promise<void>;
+  loginWithPhone: (phoneNumber: string, otp: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Default credentials for testing
-const DEFAULT_USER = {
-  email: 'test@example.com',
-  password: 'password',
-  name: 'Test User'
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    // Check localStorage for existing user session
-    const savedUser = localStorage.getItem('currentUser');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Check default credentials
-    if (email === DEFAULT_USER.email && password === DEFAULT_USER.password) {
-      const userData = {
-        id: '1',
-        name: DEFAULT_USER.name,
-        email: DEFAULT_USER.email
-      };
-      setUser(userData);
-      localStorage.setItem('currentUser', JSON.stringify(userData));
-      return true;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        // Fetch additional user data from Firestore
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        const userData = userDoc.data();
+        
+        setUser({
+          id: firebaseUser.uid,
+          name: userData?.name || firebaseUser.displayName || '',
+          email: firebaseUser.email || '',
+          photoURL: firebaseUser.photoURL || undefined,
+          phoneNumber: firebaseUser.phoneNumber || undefined,
+          createdAt: userData?.createdAt?.toDate() || new Date(),
+          updatedAt: userData?.updatedAt?.toDate() || new Date()
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Fetch additional user data from Firestore
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      const userData = userDoc.data();
+      
+      setUser({
+        id: firebaseUser.uid,
+        name: userData?.name || firebaseUser.displayName || '',
+        email: firebaseUser.email || '',
+        photoURL: firebaseUser.photoURL || undefined,
+        phoneNumber: firebaseUser.phoneNumber || undefined,
+        createdAt: userData?.createdAt?.toDate() || new Date(),
+        updatedAt: userData?.updatedAt?.toDate() || new Date()
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-    
-    return false;
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // For demo purposes, accept any registration
-    const userData = {
-      id: Date.now().toString(),
-      name,
-      email
-    };
-    setUser(userData);
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    return true;
+  const register = async (name: string, email: string, password: string, phoneNumber?: string): Promise<void> => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Create user document in Firestore
+      const userData = {
+        name,
+        email,
+        phoneNumber: phoneNumber || null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+      
+      setUser({
+        id: firebaseUser.uid,
+        name,
+        email,
+        phoneNumber: phoneNumber || undefined,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
+  const logout = async (): Promise<void> => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
+  };
+
+  const sendPhoneOTP = async (phoneNumber: string): Promise<ConfirmationResult> => {
+    try {
+      const formattedPhone = PhoneAuthService.formatPhoneNumber(phoneNumber);
+      if (!PhoneAuthService.validatePhoneNumber(formattedPhone)) {
+        throw new Error('Invalid phone number format');
+      }
+      
+      const confirmationResult = await PhoneAuthService.sendOTP(formattedPhone);
+      return confirmationResult;
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      throw error;
+    }
+  };
+
+  const verifyPhoneOTP = async (confirmationResult: ConfirmationResult, otp: string): Promise<void> => {
+    try {
+      const credential = await PhoneAuthService.verifyOTP(confirmationResult, otp);
+      await signInWithCredential(auth, credential);
+      
+      // Update user profile with phone number
+      const user = auth.currentUser;
+      if (user) {
+        await setDoc(doc(db, 'users', user.uid), {
+          phoneNumber: user.phoneNumber,
+          updatedAt: new Date()
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      throw error;
+    }
+  };
+
+  const loginWithPhone = async (phoneNumber: string, otp: string): Promise<void> => {
+    try {
+      const formattedPhone = PhoneAuthService.formatPhoneNumber(phoneNumber);
+      if (!PhoneAuthService.validatePhoneNumber(formattedPhone)) {
+        throw new Error('Invalid phone number format');
+      }
+      
+      const confirmationResult = await PhoneAuthService.sendOTP(formattedPhone);
+      await verifyPhoneOTP(confirmationResult, otp);
+    } catch (error) {
+      console.error('Error with phone login:', error);
+      throw error;
+    }
   };
 
   const value = {
     user,
+    loading,
     login,
     register,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    sendPhoneOTP,
+    verifyPhoneOTP,
+    loginWithPhone
   };
 
   return (

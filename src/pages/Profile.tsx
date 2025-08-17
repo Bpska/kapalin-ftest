@@ -1,10 +1,14 @@
-import { User, Package, CreditCard, MapPin, HelpCircle, ChevronRight } from 'lucide-react';
+import { User, Package, CreditCard, MapPin, HelpCircle, ChevronRight, Calendar, Edit3 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const profileSections = [
     {
@@ -53,18 +57,34 @@ const Profile = () => {
 
       {/* Profile Header */}
       <Card className="p-6 shadow-soft border-border">
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src="/placeholder-user.jpg" />
-            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg font-medium">
-              {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h2>
-            <p className="text-muted-foreground">{user?.email || 'user@example.com'}</p>
-            <p className="text-sm text-muted-foreground mt-1">Member since Jan 2024</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={user?.photoURL || '/placeholder-user.jpg'} />
+              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg font-medium">
+                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h2>
+              <p className="text-muted-foreground">{user?.email || 'user@example.com'}</p>
+              {user?.createdAt && (
+                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Member since {format(user.createdAt, 'MMM yyyy')}
+                </p>
+              )}
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/profile/edit')}
+            className="flex items-center gap-2"
+          >
+            <Edit3 className="h-4 w-4" />
+            Edit Profile
+          </Button>
         </div>
       </Card>
 

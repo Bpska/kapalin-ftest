@@ -10,9 +10,11 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "@/pages/Home";
 import Cart from "@/pages/Cart";
 import Profile from "@/pages/Profile";
+import ProfileEdit from "@/pages/ProfileEdit";
 import BookDetail from "@/pages/BookDetail";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ImageUpload from "@/pages/ImageUpload";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +54,20 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Profile />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/profile/edit" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ProfileEdit />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/upload" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ImageUpload />
                   </Layout>
                 </ProtectedRoute>
               } />
