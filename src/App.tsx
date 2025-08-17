@@ -64,7 +64,7 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               } />
-              <Route path="/home" element={
+              <Route path="/upload" element={
                 <ProtectedRoute>
                   <Layout>
                     <ImageUpload />

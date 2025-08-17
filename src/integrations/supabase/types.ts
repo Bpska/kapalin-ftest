@@ -59,6 +59,54 @@ export type Database = {
         }
         Relationships: []
       }
+      books: {
+        Row: {
+          author: string | null
+          category: string | null
+          content_preview: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          image_url: string | null
+          language: string | null
+          pages: number | null
+          price: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content_preview?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          pages?: number | null
+          price?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content_preview?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          pages?: number | null
+          price?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       image_uploads: {
         Row: {
           created_at: string

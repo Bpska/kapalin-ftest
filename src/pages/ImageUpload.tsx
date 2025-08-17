@@ -6,9 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, Upload, User, Phone, Instagram, Loader2 } from 'lucide-react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage, db } from '@/lib/firebase';
-import { addDoc, collection } from 'firebase/firestore';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UploadFormData {
   name: string;
@@ -24,7 +22,7 @@ const ImageUpload = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [formData, setFormData] = useState<UploadFormData>({
-    name: user?.name || '',
+    name: user?.name || user?.email || '',
     phone: '',
     instagram: '',
   });
@@ -56,24 +54,38 @@ const ImageUpload = () => {
 
     setIsLoading(true);
     try {
-      // Upload image to Firebase Storage
+      // Upload image to Supabase Storage
       const timestamp = Date.now();
-      const storageRef = ref(storage, `user-uploads/${user.id}/${timestamp}_${imageFile.name}`);
-      await uploadBytes(storageRef, imageFile);
-      const imageUrl = await getDownloadURL(storageRef);
+      const fileName = `${timestamp}_${imageFile.name}`;
+      const filePath = `${user.id}/${fileName}`;
 
-      // Save upload data to Firestore
-      await addDoc(collection(db, 'imageUploads'), {
-        userId: user.id,
-        userEmail: user.email,
-        name: formData.name,
-        phone: formData.phone,
-        instagram: formData.instagram,
-        imageUrl,
-        imageName: imageFile.name,
-        uploadedAt: new Date(),
-        status: 'pending',
-      });
+      const { error: uploadError } = await supabase.storage
+        .from('user-images')
+        .upload(filePath, imageFile);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL for the uploaded image
+      const { data: urlData } = supabase.storage
+        .from('user-images')
+        .getPublicUrl(filePath);
+
+      // Save upload data to Supabase database
+      const { error: dbError } = await supabase
+        .from('image_uploads')
+        .insert({
+          user_id: user.id,
+          name: formData.name,
+          phone: formData.phone,
+          instagram: formData.instagram,
+          image_url: urlData.publicUrl,
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
 
       toast({
         title: "Upload successful!",
@@ -84,11 +96,12 @@ const ImageUpload = () => {
       setImageFile(null);
       setPreviewUrl('');
       setFormData({
-        name: user?.name || '',
+        name: user?.name || user?.email || '',
         phone: '',
         instagram: '',
       });
     } catch (error) {
+      console.error('Upload error:', error);
       toast({
         title: "Upload failed",
         description: "Failed to upload image. Please try again.",
