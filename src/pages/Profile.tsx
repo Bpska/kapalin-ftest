@@ -107,6 +107,9 @@ const Profile = () => {
             <div>
               <h2 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h2>
               <p className="text-muted-foreground">{user?.email || 'user@example.com'}</p>
+              {user?.phoneNumber && (
+                <p className="text-muted-foreground">{user.phoneNumber}</p>
+              )}
               {user?.createdAt && (
                 <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
