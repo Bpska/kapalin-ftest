@@ -1,4 +1,4 @@
-import { Home, ShoppingCart, User, LogIn, LogOut } from 'lucide-react';
+import { Home, ShoppingCart, User, LogIn, LogOut, Upload } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +17,12 @@ const BottomNavigation = () => {
   };
 
   const navItems = [
+    {
+      icon: Upload,
+      label: 'Upload',
+      path: '/upload',
+      public: false,
+    },
     {
       icon: Home,
       label: 'Home',
