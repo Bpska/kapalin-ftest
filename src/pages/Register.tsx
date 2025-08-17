@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, BookOpen, Phone } from 'lucide-react';
-import { PhoneAuthService } from '@/lib/phoneAuth';
+import { Eye, EyeOff, BookOpen } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -19,26 +18,21 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [verificationId, setVerificationId] = useState('');
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
-    
-    // Reset phone verification if phone number changes
-    if (e.target.name === 'phoneNumber') {
-      setPhoneVerified(false);
-      setOtpSent(false);
-      setOtp('');
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,17 +62,17 @@ const Register = () => {
       await register(formData.name, formData.email, formData.password, formData.phoneNumber);
       toast({
         title: "Account created!",
-        description: "Welcome to Kapalin Gita Tales. Your wisdom journey begins now.",
+        description: "Please check your email to confirm your account.",
       });
-      navigate('/');
+      navigate('/login');
     } catch (error: any) {
       let errorMessage = "Registration failed. Please try again.";
       
-      if (error.code === 'auth/email-already-in-use') {
+      if (error.message?.includes('User already registered')) {
         errorMessage = "This email is already registered. Please use a different email or try logging in.";
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (error.message?.includes('Invalid email')) {
         errorMessage = "Please enter a valid email address.";
-      } else if (error.code === 'auth/weak-password') {
+      } else if (error.message?.includes('Password should be at least 6 characters')) {
         errorMessage = "Password is too weak. Please use a stronger password.";
       }
 
@@ -90,61 +84,6 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSendOTP = async () => {
-    if (!PhoneAuthService.validatePhoneNumber(formData.phoneNumber)) {
-      toast({
-        title: "Invalid phone number",
-        description: "Please enter a valid 10-digit phone number",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Initialize reCAPTCHA
-      PhoneAuthService.initializeRecaptcha('recaptcha-container');
-      
-      // Send OTP
-      const formattedPhone = PhoneAuthService.formatPhoneNumber(formData.phoneNumber);
-      // Note: This is a simplified implementation. In a real app, you'd use Firebase's phone auth
-      // For now, we'll simulate OTP sending
-      setTimeout(() => {
-        setOtpSent(true);
-        setVerificationId('simulated-verification-id');
-        toast({
-          title: "OTP Sent",
-          description: "Please check your phone for the OTP (Demo: 123456)",
-        });
-      }, 1000);
-    } catch (error: any) {
-      toast({
-        title: "Failed to send OTP",
-        description: error.message || "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (otp !== '123456') { // Demo OTP
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter the correct OTP",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setPhoneVerified(true);
-    toast({
-      title: "Phone Verified",
-      description: "Your phone number has been verified successfully",
-    });
   };
 
   return (
@@ -231,68 +170,24 @@ const Register = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <div className="flex space-x-2">
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                placeholder="Enter your phone number"
-                pattern="[0-9]{10}"
-                maxLength={10}
-                disabled={phoneVerified || otpSent}
-              />
-              {!phoneVerified && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleSendOTP}
-                  disabled={isLoading || !formData.phoneNumber || !PhoneAuthService.validatePhoneNumber(formData.phoneNumber)}
-                >
-                  {otpSent ? 'Resend OTP' : 'Send OTP'}
-                </Button>
-              )}
-            </div>
-            {phoneVerified && (
-              <p className="text-sm text-green-600">✓ Phone number verified</p>
-            )}
+            <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="Enter your phone number"
+              pattern="[0-9]{10}"
+              maxLength={10}
+            />
           </div>
-
-          {otpSent && !phoneVerified && (
-            <div className="space-y-2">
-              <Label htmlFor="otp">OTP</Label>
-              <div className="flex space-x-2">
-                <Input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleVerifyOTP}
-                  disabled={!otp || otp.length !== 6}
-                >
-                  Verify
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Demo OTP: 123456</p>
-            </div>
-          )}
-
-          <div id="recaptcha-container"></div>
 
           <Button
             type="submit"
             className="w-full"
             variant="wisdom"
-            disabled={isLoading || (formData.phoneNumber && !phoneVerified)}
+            disabled={isLoading}
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>

@@ -1,17 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User as FirebaseUser,
-  ConfirmationResult,
-  signInWithCredential,
-  PhoneAuthProvider
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
-import { PhoneAuthService } from '@/lib/phoneAuth';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   id: string;
@@ -19,176 +8,123 @@ interface User {
   email: string;
   photoURL?: string;
   phoneNumber?: string;
+  bio?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, phoneNumber?: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
-  sendPhoneOTP: (phoneNumber: string) => Promise<ConfirmationResult>;
-  verifyPhoneOTP: (confirmationResult: ConfirmationResult, otp: string) => Promise<void>;
-  loginWithPhone: (phoneNumber: string, otp: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        // Fetch additional user data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        const userData = userDoc.data();
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
         
-        setUser({
-          id: firebaseUser.uid,
-          name: userData?.name || firebaseUser.displayName || '',
-          email: firebaseUser.email || '',
-          photoURL: firebaseUser.photoURL || undefined,
-          phoneNumber: firebaseUser.phoneNumber || undefined,
-          createdAt: userData?.createdAt?.toDate() || new Date(),
-          updatedAt: userData?.updatedAt?.toDate() || new Date()
-        });
-      } else {
-        setUser(null);
+        if (session?.user) {
+          // Fetch user profile from Supabase
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          setUser({
+            id: session.user.id,
+            name: profile?.name || session.user.email?.split('@')[0] || '',
+            email: session.user.email || '',
+            phoneNumber: profile?.phone || undefined,
+            bio: profile?.bio || undefined,
+            photoURL: profile?.avatar_url || undefined,
+            createdAt: profile?.created_at ? new Date(profile.created_at) : new Date(),
+            updatedAt: profile?.updated_at ? new Date(profile.updated_at) : new Date()
+          });
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
       }
-      setLoading(false);
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSession(session);
+        // The auth state change listener will handle user profile fetching
+      } else {
+        setLoading(false);
+      }
     });
 
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      
-      // Fetch additional user data from Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      const userData = userDoc.data();
-      
-      setUser({
-        id: firebaseUser.uid,
-        name: userData?.name || firebaseUser.displayName || '',
-        email: firebaseUser.email || '',
-        photoURL: firebaseUser.photoURL || undefined,
-        phoneNumber: firebaseUser.phoneNumber || undefined,
-        createdAt: userData?.createdAt?.toDate() || new Date(),
-        updatedAt: userData?.updatedAt?.toDate() || new Date()
-      });
-    } catch (error) {
-      console.error('Login error:', error);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
       throw error;
     }
+
+    // User state will be updated by the auth state listener
   };
 
   const register = async (name: string, email: string, password: string, phoneNumber?: string): Promise<void> => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      
-      // Create user document in Firestore
-      const userData = {
-        name,
-        email,
-        phoneNumber: phoneNumber || null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-      
-      setUser({
-        id: firebaseUser.uid,
-        name,
-        email,
-        phoneNumber: phoneNumber || undefined,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      console.error('Registration error:', error);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          name,
+          phone: phoneNumber
+        }
+      }
+    });
+
+    if (error) {
       throw error;
     }
+
+    // Profile will be created automatically by the trigger
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await signOut(auth);
-      setUser(null);
-    } catch (error) {
-      console.error('Logout error:', error);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
       throw error;
     }
-  };
-
-  const sendPhoneOTP = async (phoneNumber: string): Promise<ConfirmationResult> => {
-    try {
-      const formattedPhone = PhoneAuthService.formatPhoneNumber(phoneNumber);
-      if (!PhoneAuthService.validatePhoneNumber(formattedPhone)) {
-        throw new Error('Invalid phone number format');
-      }
-      
-      const confirmationResult = await PhoneAuthService.sendOTP(formattedPhone);
-      return confirmationResult;
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      throw error;
-    }
-  };
-
-  const verifyPhoneOTP = async (confirmationResult: ConfirmationResult, otp: string): Promise<void> => {
-    try {
-      const credential = await PhoneAuthService.verifyOTP(confirmationResult, otp);
-      await signInWithCredential(auth, credential);
-      
-      // Update user profile with phone number
-      const user = auth.currentUser;
-      if (user) {
-        await setDoc(doc(db, 'users', user.uid), {
-          phoneNumber: user.phoneNumber,
-          updatedAt: new Date()
-        }, { merge: true });
-      }
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      throw error;
-    }
-  };
-
-  const loginWithPhone = async (phoneNumber: string, otp: string): Promise<void> => {
-    try {
-      const formattedPhone = PhoneAuthService.formatPhoneNumber(phoneNumber);
-      if (!PhoneAuthService.validatePhoneNumber(formattedPhone)) {
-        throw new Error('Invalid phone number format');
-      }
-      
-      const confirmationResult = await PhoneAuthService.sendOTP(formattedPhone);
-      await verifyPhoneOTP(confirmationResult, otp);
-    } catch (error) {
-      console.error('Error with phone login:', error);
-      throw error;
-    }
+    
+    setUser(null);
+    setSession(null);
   };
 
   const value = {
     user,
+    session,
     loading,
     login,
     register,
     logout,
-    isAuthenticated: !!user,
-    sendPhoneOTP,
-    verifyPhoneOTP,
-    loginWithPhone
+    isAuthenticated: !!session?.user,
   };
 
   return (

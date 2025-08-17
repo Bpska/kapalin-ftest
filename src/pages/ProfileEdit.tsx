@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,11 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, User, Link, Save, Loader2 } from 'lucide-react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
-import { updateDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { Camera, Save, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { SupabaseUserService } from '@/lib/supabaseUserService';
 
 interface ProfileFormData {
   name: string;
@@ -26,10 +24,19 @@ const ProfileEdit = () => {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user?.name || '',
-    bio: '',
+    bio: user?.bio || '',
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        bio: user.bio || '',
+      });
+    }
+  }, [user]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,21 +56,31 @@ const ProfileEdit = () => {
 
     setIsLoading(true);
     try {
-      let photoURL = user.photoURL;
+      let avatarUrl = user.photoURL;
 
       // Upload image if selected
       if (imageFile) {
-        const storageRef = ref(storage, `profile-images/${user.id}`);
-        await uploadBytes(storageRef, imageFile);
-        photoURL = await getDownloadURL(storageRef);
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}/avatar.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('user-images')
+          .upload(fileName, imageFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('user-images')
+          .getPublicUrl(fileName);
+
+        avatarUrl = publicUrl;
       }
 
       // Update user profile
-      await updateDoc(doc(db, 'users', user.id), {
+      await SupabaseUserService.updateUserProfile(user.id, {
         name: formData.name,
         bio: formData.bio,
-        photoURL,
-        updatedAt: new Date(),
+        avatar_url: avatarUrl,
       });
 
       toast({
@@ -71,6 +88,7 @@ const ProfileEdit = () => {
         description: "Your profile has been successfully updated.",
       });
     } catch (error) {
+      console.error('Profile update error:', error);
       toast({
         title: "Update failed",
         description: "Failed to update profile. Please try again.",
@@ -151,8 +169,6 @@ const ProfileEdit = () => {
                 rows={4}
               />
             </div>
-
-            
 
             <Button 
               type="submit" 

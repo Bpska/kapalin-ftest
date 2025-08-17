@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { User, Package, CreditCard, MapPin, HelpCircle, ChevronRight, Calendar, Edit3 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -5,37 +6,75 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { SupabaseUserService, Order, Address, PaymentMethod } from '@/lib/supabaseUserService';
 
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      loadUserData();
+    }
+  }, [user]);
+
+  const loadUserData = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      const [userOrders, userAddresses, userPaymentMethods] = await Promise.all([
+        SupabaseUserService.getUserOrders(user.id),
+        SupabaseUserService.getAddresses(user.id),
+        SupabaseUserService.getPaymentMethods(user.id)
+      ]);
+      
+      setOrders(userOrders);
+      setAddresses(userAddresses);
+      setPaymentMethods(userPaymentMethods);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const profileSections = [
     {
       icon: Package,
       title: 'My Orders',
       description: 'Track your wisdom tales',
-      items: [
-        { name: 'The Young Krishna\'s Adventures', status: 'Delivered' },
-        { name: 'Chanakya\'s Smart Tales', status: 'Processing' },
+      items: orders.length > 0 ? orders.slice(0, 2).map(order => ({
+        name: `Order #${order.id.slice(0, 8)}...`,
+        status: order.status.charAt(0).toUpperCase() + order.status.slice(1)
+      })) : [
+        { name: 'No orders yet', status: 'Start shopping!' }
       ]
     },
     {
       icon: CreditCard,
       title: 'Payment Methods',
       description: 'Manage your payment options',
-      items: [
-        { name: 'UPI: user@paytm', status: 'Primary' },
-        { name: '**** 1234', status: 'Visa' },
+      items: paymentMethods.length > 0 ? paymentMethods.slice(0, 2).map(method => ({
+        name: method.name,
+        status: method.is_default ? 'Default' : method.type.toUpperCase()
+      })) : [
+        { name: 'No payment methods', status: 'Add one now' }
       ]
     },
     {
       icon: MapPin,
       title: 'Shipping Addresses',
       description: 'Manage delivery locations',
-      items: [
-        { name: 'Home', status: '123 Wisdom Street, Mumbai' },
-        { name: 'Office', status: '456 Knowledge Lane, Delhi' },
+      items: addresses.length > 0 ? addresses.slice(0, 2).map(address => ({
+        name: address.name,
+        status: `${address.city}, ${address.state}`
+      })) : [
+        { name: 'No addresses saved', status: 'Add your address' }
       ]
     },
     {
