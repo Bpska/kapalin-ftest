@@ -42,7 +42,9 @@ const Home = () => {
         }
 
         if (data) {
-          setBook(data);
+          // Use local image if image_url is not a valid URL
+          const imageUrl = data.image_url && data.image_url.startsWith('http') ? data.image_url : bgCover;
+          setBook({...data, image_url: imageUrl});
         } else {
           // If no book in database, create a default book object using local image
           setBook({
