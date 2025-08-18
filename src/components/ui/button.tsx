@@ -9,17 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-warm",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-warm dark:shadow-lg dark:hover:shadow-xl",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:shadow-lg",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:border-border dark:hover:bg-accent/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        premium: "bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 hover:scale-105 active:scale-95 backdrop-blur-sm",
-        wisdom: "bg-wisdom-gold text-sage-brown hover:bg-wisdom-gold/80 shadow-soft hover:shadow-warm",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:shadow-lg",
+        ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        link: "text-primary underline-offset-4 hover:underline dark:text-primary",
+        premium: "bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 hover:scale-105 active:scale-95 backdrop-blur-sm dark:shadow-xl",
+        wisdom: "bg-wisdom-gold text-sage-brown hover:bg-wisdom-gold/80 shadow-soft hover:shadow-warm dark:shadow-lg dark:text-foreground dark:bg-yellow-500 dark:hover:bg-yellow-600",
       },
       size: {
         default: "h-10 px-4 py-2",

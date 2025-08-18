@@ -8,6 +8,11 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  /* Remove forced dark mode to allow theme switching */
+  /* html {
+    @apply dark;
+  } */
+  
   :root {
     /* Core Background & Text */
     --background: 39 25% 97%; /* Warm ivory white */
@@ -71,58 +76,79 @@ All colors MUST be HSL.
     --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Core Background & Text - Deep Dark Theme */
+    --background: 220 14% 4%; /* Very dark navy-black */
+    --foreground: 210 20% 98%; /* Almost white text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Card & Surface Colors - Dark with subtle contrast */
+    --card: 220 14% 6%; /* Slightly lighter than background */
+    --card-foreground: 210 20% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 14% 6%;
+    --popover-foreground: 210 20% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Primary Brand Colors - Bright accents for dark theme */
+    --primary: 210 100% 70%; /* Bright blue for primary actions */
+    --primary-foreground: 220 14% 4%; /* Dark text on bright primary */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 14% 10%; /* Dark secondary surfaces */
+    --secondary-foreground: 210 20% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Muted & Subtle Elements - Dark with good contrast */
+    --muted: 220 14% 8%; /* Dark muted backgrounds */
+    --muted-foreground: 210 15% 65%; /* Muted text that's still readable */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent - Bright accent for dark theme */
+    --accent: 280 100% 70%; /* Bright purple accent */
+    --accent-foreground: 220 14% 4%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status Colors - Adjusted for dark theme */
+    --destructive: 0 84% 60%; /* Brighter red for better visibility */
+    --destructive-foreground: 210 20% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Interactive Elements - Dark with good contrast */
+    --border: 220 14% 12%; /* Dark borders with subtle contrast */
+    --input: 220 14% 8%; /* Dark input fields */
+    --ring: 210 100% 70%; /* Bright ring for focus states */
+
+    /* Custom Design Tokens - Dark theme optimized */
+    --wisdom-gold: 45 100% 60%; /* Brighter gold for dark backgrounds */
+    --warm-cream: 220 14% 8%; /* Dark cream equivalent */
+    --sage-brown: 210 20% 80%; /* Light sage for dark backgrounds */
+    
+    /* Gradients - Dark theme optimized */
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 70%), hsl(45 100% 60%));
+    --gradient-warm: linear-gradient(180deg, hsl(220 14% 8%), hsl(220 14% 6%));
+    --gradient-subtle: linear-gradient(135deg, hsl(220 14% 6%), hsl(220 14% 8%));
+
+    /* Shadows - Dark theme optimized */
+    --shadow-soft: 0 4px 20px hsl(0 0% 0% / 0.3);
+    --shadow-warm: 0 8px 25px hsl(45 100% 60% / 0.2);
+    --shadow-elevated: 0 12px 40px hsl(0 0% 0% / 0.4);
+
+    /* Glass Morphism - Dark theme */
+    --glass-bg: hsl(220 14% 6% / 0.8);
+    --glass-border: hsl(220 14% 12% / 0.3);
+    
+    /* Sidebar - Dark theme */
+    --sidebar-background: 220 14% 6%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 210 100% 70%;
+    --sidebar-primary-foreground: 220 14% 4%;
+    --sidebar-accent: 220 14% 10%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 220 14% 12%;
+    --sidebar-ring: 210 100% 70%;
   }
 }
 
@@ -133,5 +159,93 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    color-scheme: light dark;
+  }
+
+  /* Ensure all form elements are theme compatible */
+  input, textarea, select {
+    @apply bg-background text-foreground border-border;
+  }
+
+  /* Ensure all buttons have proper theme styling */
+  button {
+    @apply text-foreground;
+  }
+
+  /* Ensure all links are visible in both themes */
+  a {
+    @apply text-primary hover:text-primary/80;
+  }
+
+  /* Ensure all headings are properly visible */
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-foreground;
+  }
+
+  /* Ensure all paragraphs are readable */
+  p {
+    @apply text-foreground;
+  }
+
+  /* Ensure all labels are visible */
+  label {
+    @apply text-foreground;
+  }
+
+  /* Ensure all badges are visible */
+  .badge {
+    @apply text-foreground;
+  }
+
+  /* Ensure all cards have proper theme styling */
+  .card {
+    @apply bg-card text-card-foreground border-border;
+  }
+
+  /* Ensure all modals and overlays are theme-aware */
+  .modal, .overlay {
+    @apply bg-background/95 backdrop-blur-sm;
+  }
+
+  /* Ensure all tooltips are theme-aware */
+  .tooltip {
+    @apply bg-popover text-popover-foreground border-border;
+  }
+
+  /* Ensure all dropdowns are theme-aware */
+  .dropdown {
+    @apply bg-popover text-popover-foreground border-border;
+  }
+
+  /* Ensure all tables are theme-aware */
+  table {
+    @apply bg-card text-card-foreground;
+  }
+
+  th, td {
+    @apply border-border;
+  }
+
+  /* Ensure all scrollbars are theme-aware */
+  ::-webkit-scrollbar {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  /* Ensure all selection is visible */
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Ensure all focus states are visible */
+  :focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
