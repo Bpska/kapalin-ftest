@@ -14,20 +14,20 @@ All colors MUST be HSL.
   } */
   
   :root {
-    /* Core Background & Text */
-    --background: 39 25% 97%; /* Warm ivory white */
-    --foreground: 25 15% 25%; /* Soft dark brown */
+  /* Core Background & Text - Dark hero-first palette (navy + warm gold) */
+  --background: 225 20% 6%; /* Deep navy / almost black */
+  --foreground: 40 8% 96%; /* Warm off-white for typography */
 
-    /* Card & Surface Colors */
-    --card: 45 30% 95%; /* Light warm beige */
-    --card-foreground: 25 15% 25%;
+  /* Card & Surface Colors */
+  --card: 225 18% 10%; /* Slightly lighter than page background */
+  --card-foreground: 40 8% 96%;
 
     --popover: 39 25% 97%;
     --popover-foreground: 25 15% 25%;
 
-    /* Primary Brand Colors - Warm Brown & Gold */
-    --primary: 30 25% 35%; /* Soft brown for primary actions */
-    --primary-foreground: 45 40% 95%;
+  /* Primary Brand Colors - Warm Gold accents */
+  --primary: 44 85% 52%; /* Rich gold for CTAs and highlights */
+  --primary-foreground: 210 14% 6%; /* Dark text on gold */
 
     --secondary: 42 35% 88%; /* Light sand for secondary surfaces */
     --secondary-foreground: 25 15% 25%;
@@ -36,36 +36,36 @@ All colors MUST be HSL.
     --muted: 45 20% 92%; /* Very light beige */
     --muted-foreground: 30 10% 45%; /* Muted brown text */
 
-    /* Accent - Pastel Gold */
-    --accent: 51 30% 80%; /* Soft pastel gold */
-    --accent-foreground: 25 15% 25%;
+  /* Accent - Supporting gold / warm cream */
+  --accent: 44 85% 62%;
+  --accent-foreground: 210 14% 6%;
 
     /* Status Colors */
     --destructive: 0 65% 55%;
     --destructive-foreground: 45 40% 95%;
 
-    /* Interactive Elements */
-    --border: 42 20% 85%; /* Subtle warm border */
-    --input: 42 20% 90%; /* Input field background */
-    --ring: 30 25% 35%; /* Focus ring matches primary */
+  /* Interactive Elements */
+  --border: 225 18% 12%; /* Subtle dark border */
+  --input: 225 18% 10%; /* Dark input field background */
+  --ring: 44 85% 52%; /* Gold ring for focus states */
 
     /* Design System Values */
     --radius: 0.75rem; /* More rounded for premium feel */
 
     /* Custom Design Tokens */
-    --wisdom-gold: 51 45% 75%; /* Richer gold for highlights */
-    --warm-cream: 45 35% 92%; /* Cream for hero sections */
-    --sage-brown: 25 20% 40%; /* Deeper brown for headings */
+  --wisdom-gold: 44 85% 52%; /* Rich gold highlight */
+  --warm-cream: 44 40% 92%; /* Soft warm cream used sparingly */
+  --sage-brown: 30 18% 35%; /* Deep brown for headings when needed */
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--wisdom-gold)));
+  --gradient-primary: linear-gradient(135deg, hsl(var(--background)), hsl(var(--wisdom-gold)));
     --gradient-warm: linear-gradient(180deg, hsl(var(--warm-cream)), hsl(var(--card)));
     --gradient-subtle: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)));
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px hsl(var(--primary) / 0.08);
-    --shadow-warm: 0 8px 25px hsl(var(--wisdom-gold) / 0.15);
-    --shadow-elevated: 0 12px 40px hsl(var(--primary) / 0.12);
+  --shadow-soft: 0 6px 30px hsl(0 0% 0% / 0.5);
+  --shadow-warm: 0 10px 40px hsl(var(--wisdom-gold) / 0.12);
+  --shadow-elevated: 0 18px 60px hsl(0 0% 0% / 0.6);
 
     /* Glass Morphism */
     --glass-bg: hsl(var(--card) / 0.8);
@@ -75,8 +75,8 @@ All colors MUST be HSL.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-background: 225 18% 8%;
+  --sidebar-foreground: 40 8% 96%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
@@ -86,69 +86,49 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Core Background & Text - Deep Dark Theme */
-    --background: 220 14% 4%; /* Very dark navy-black */
-    --foreground: 210 20% 98%; /* Almost white text */
+  /* When `.dark` is explicit, use slightly warmer/different tone for contrast */
+  --background: 225 18% 8%;
+  --foreground: 40 8% 96%;
 
-    /* Card & Surface Colors - Dark with subtle contrast */
-    --card: 220 14% 6%; /* Slightly lighter than background */
-    --card-foreground: 210 20% 98%;
+  --card: 225 16% 12%;
+  --card-foreground: 40 8% 96%;
 
-    --popover: 220 14% 6%;
-    --popover-foreground: 210 20% 98%;
+  --popover: 225 16% 12%;
+  --popover-foreground: 40 8% 96%;
 
-    /* Primary Brand Colors - Bright accents for dark theme */
-    --primary: 210 100% 70%; /* Bright blue for primary actions */
-    --primary-foreground: 220 14% 4%; /* Dark text on bright primary */
+  --primary: 44 85% 52%;
+  --primary-foreground: 210 14% 6%;
 
-    --secondary: 220 14% 10%; /* Dark secondary surfaces */
-    --secondary-foreground: 210 20% 98%;
+  --secondary: 225 16% 10%;
+  --secondary-foreground: 40 8% 96%;
 
-    /* Muted & Subtle Elements - Dark with good contrast */
-    --muted: 220 14% 8%; /* Dark muted backgrounds */
-    --muted-foreground: 210 15% 65%; /* Muted text that's still readable */
+  --muted: 225 16% 12%;
+  --muted-foreground: 40 8% 70%;
 
-    /* Accent - Bright accent for dark theme */
-    --accent: 280 100% 70%; /* Bright purple accent */
-    --accent-foreground: 220 14% 4%;
+  --accent: 44 85% 62%;
+  --accent-foreground: 210 14% 6%;
 
-    /* Status Colors - Adjusted for dark theme */
-    --destructive: 0 84% 60%; /* Brighter red for better visibility */
-    --destructive-foreground: 210 20% 98%;
+  --destructive: 0 78% 60%;
+  --destructive-foreground: 40 8% 96%;
 
-    /* Interactive Elements - Dark with good contrast */
-    --border: 220 14% 12%; /* Dark borders with subtle contrast */
-    --input: 220 14% 8%; /* Dark input fields */
-    --ring: 210 100% 70%; /* Bright ring for focus states */
+  --border: 225 16% 12%;
+  --input: 225 16% 10%;
+  --ring: 44 85% 52%;
 
-    /* Custom Design Tokens - Dark theme optimized */
-    --wisdom-gold: 45 100% 60%; /* Brighter gold for dark backgrounds */
-    --warm-cream: 220 14% 8%; /* Dark cream equivalent */
-    --sage-brown: 210 20% 80%; /* Light sage for dark backgrounds */
-    
-    /* Gradients - Dark theme optimized */
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 70%), hsl(45 100% 60%));
-    --gradient-warm: linear-gradient(180deg, hsl(220 14% 8%), hsl(220 14% 6%));
-    --gradient-subtle: linear-gradient(135deg, hsl(220 14% 6%), hsl(220 14% 8%));
+  --wisdom-gold: 44 85% 52%;
+  --warm-cream: 44 40% 92%;
+  --sage-brown: 30 18% 35%;
 
-    /* Shadows - Dark theme optimized */
-    --shadow-soft: 0 4px 20px hsl(0 0% 0% / 0.3);
-    --shadow-warm: 0 8px 25px hsl(45 100% 60% / 0.2);
-    --shadow-elevated: 0 12px 40px hsl(0 0% 0% / 0.4);
+  --gradient-primary: linear-gradient(135deg, hsl(var(--background)), hsl(var(--wisdom-gold)));
+  --gradient-warm: linear-gradient(180deg, hsl(var(--warm-cream)), hsl(var(--card)));
+  --gradient-subtle: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)));
 
-    /* Glass Morphism - Dark theme */
-    --glass-bg: hsl(220 14% 6% / 0.8);
-    --glass-border: hsl(220 14% 12% / 0.3);
-    
-    /* Sidebar - Dark theme */
-    --sidebar-background: 220 14% 6%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 210 100% 70%;
-    --sidebar-primary-foreground: 220 14% 4%;
-    --sidebar-accent: 220 14% 10%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 14% 12%;
-    --sidebar-ring: 210 100% 70%;
+  --shadow-soft: 0 6px 30px hsl(0 0% 0% / 0.5);
+  --shadow-warm: 0 10px 40px hsl(var(--wisdom-gold) / 0.12);
+  --shadow-elevated: 0 18px 60px hsl(0 0% 0% / 0.6);
+
+  --glass-bg: hsl(var(--card) / 0.7);
+  --glass-border: hsl(var(--border) / 0.3);
   }
 }
 

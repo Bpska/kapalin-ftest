@@ -50,6 +50,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Book preview pages data
   const previewPages = [
@@ -185,101 +186,47 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/20">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-transparent py-20 dark:from-primary/20 dark:via-primary/10 dark:to-transparent">
-        <div className="absolute inset-0 opacity-30 dark:opacity-20"></div>
-        
-        {/* Theme Toggle Button - Top Right */}
+      <div className="relative overflow-hidden py-24" style={{background: 'linear-gradient(180deg, rgba(4,7,19,1) 0%, rgba(10,12,25,1) 100%)'}}>
         <div className="absolute top-6 right-6 z-10">
           <ThemeToggle />
         </div>
-        
-        <div className="relative max-w-5xl mx-auto px-4 text-center">
-          <Badge variant="outline" className="mb-6 border-primary/20 text-primary text-base px-4 py-2 dark:border-primary/40 dark:text-primary dark:bg-primary/10">
-            Welcome to
-          </Badge>
-          <h1 className="font-serif text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight dark:text-foreground">
-            Kapalin Gita Tales
-          </h1>
-          <p className="text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed dark:text-muted-foreground">
-            Ancient wisdom for young minds - Discover timeless teachings through beautiful storytelling, 
-            digital experiences, and spiritual guidance
-          </p>
-          
-          {/* Featured Book with Two Images */}
-          {book && (
-            <Card className="max-w-6xl mx-auto p-8 bg-card/80 backdrop-blur-sm border-primary/20 dark:bg-card/90 dark:border-primary/30">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                {/* Left Side - Two Book Images */}
-                <div className="space-y-6">
-                  {/* First Image - Original */}
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent rounded-2xl transform rotate-1 group-hover:rotate-2 transition-transform duration-300 dark:from-primary/30"></div>
-                    <div className="relative bg-white p-4 rounded-2xl shadow-2xl dark:bg-gray-800">
-                      <img
-                        src={originalImg}
-                        alt="Bhagavad Gita Original Cover"
-                        className="w-full object-contain rounded-xl shadow-lg"
-                        style={{ maxHeight: '300px', minHeight: '250px' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Second Image - Page 2 */}
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent rounded-2xl transform -rotate-1 group-hover:-rotate-2 transition-transform duration-300 dark:from-primary/30"></div>
-                    <div className="relative bg-white p-4 rounded-2xl shadow-2xl dark:bg-gray-800">
-                      <img
-                        src={page2Img}
-                        alt="Bhagavad Gita Page 2"
-                        className="w-full object-contain rounded-xl shadow-lg"
-                        style={{ maxHeight: '300px', minHeight: '250px' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Right Side - Book Info and Preview Button */}
-                <div className="space-y-6 text-left">
-                  <h2 className="font-serif text-3xl font-bold text-foreground dark:text-foreground">
-                    Featured Book
-                  </h2>
-                  <h3 className="font-serif text-2xl font-bold text-primary dark:text-primary">
-                    {book.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg dark:text-muted-foreground">
-                    {book.description}
-                  </p>
-                  <div className="flex items-baseline gap-2 mb-6">
-                    <span className="text-3xl font-bold text-foreground dark:text-foreground">
-                      ₹{book.price}
-                    </span>
-                    <span className="text-sm text-muted-foreground dark:text-muted-foreground">
-                      {book.currency}
-                    </span>
-                  </div>
-                  
-                  {/* Preview Button */}
-                  <Button 
-                    onClick={openPreview}
-                    className="w-full h-14 text-lg font-medium bg-yellow-500 hover:bg-yellow-600 text-white dark:bg-yellow-600 dark:hover:bg-yellow-700"
-                    variant="default"
-                  >
-                    <BookOpen className="mr-3 h-6 w-6" />
-                    Preview Book (3-4 Pages)
-                  </Button>
-                  
-                  <Button 
-                    onClick={handleAddToCart}
-                    className="w-full h-12 text-base font-medium"
-                    variant="outline"
-                  >
-                    <Download className="mr-2 h-5 w-5" />
-                    Add to Cart
-                  </Button>
-                </div>
+
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-left">
+              <Badge variant="outline" className="mb-6 border-white/10 text-wisdom-gold text-base px-4 py-2 bg-white/2">
+                Wisdom of the Ages
+              </Badge>
+              <h1 className="font-serif text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
+                Bhagavad Gita for the Next Generation
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
+                Stories for the future — modern, accessible retellings with audio, e-books, and visual experiences.
+              </p>
+
+              <div className="flex flex-wrap gap-4">
+                <Button
+                  onClick={() => handleNavigation('/ebook')}
+                  className="h-14 px-6 text-lg font-medium bg-wisdom-gold text-black hover:brightness-95"
+                  variant="default">
+                  Buy Now
+                </Button>
+
+                <Button
+                  onClick={() => handleNavigation('/eaudio')}
+                  className="h-14 px-6 text-lg font-medium border border-white/10 text-foreground bg-transparent hover:bg-white/3"
+                  variant="outline">
+                  Listen to Audio
+                </Button>
               </div>
-            </Card>
-          )}
+            </div>
+
+            <div className="flex items-center justify-center">
+              <div className="relative w-full max-w-xs md:max-w-sm">
+                <img src={bgCover} alt="Bhagavad Gita Cover" className="w-full rounded-2xl shadow-elevated" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -360,6 +307,128 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      {/* Experience Section (features, audio player, media tiles) */}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <h2 className="text-center font-serif text-3xl md:text-4xl font-bold text-foreground mb-8">
+          Experience Kapalin Gita Tales
+        </h2>
+
+        {/* Feature Row */}
+        <div className="grid md:grid-cols-3 gap-4 mb-10">
+          <div className="p-6 rounded-xl bg-card/70 border border-border shadow-soft flex items-start gap-4">
+            <div className="p-3 rounded-md bg-wisdom-gold/10 text-wisdom-gold">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground">Easy to Understand</h4>
+              <p className="text-sm text-muted-foreground">Modern story-telling style</p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl bg-card/70 border border-border shadow-soft flex items-start gap-4">
+            <div className="p-3 rounded-md bg-wisdom-gold/10 text-wisdom-gold">
+              <Headphones className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground">Audio + Digital</h4>
+              <p className="text-sm text-muted-foreground">Listen or read anywhere</p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl bg-card/70 border border-border shadow-soft flex items-start gap-4">
+            <div className="p-3 rounded-md bg-wisdom-gold/10 text-wisdom-gold">
+              <Users className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground">Global Reach</h4>
+              <p className="text-sm text-muted-foreground">20,000+ seekers already on the journey</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Audio Player Card */}
+        <Card className="mb-10 p-6 bg-card/70 border border-border shadow-elevated">
+          <div className="grid md:grid-cols-3 gap-6 items-center">
+            <div className="md:col-span-1">
+              <div className="relative rounded-lg overflow-hidden">
+                <img src={originalImg} alt="Book" className="w-full object-cover rounded-lg shadow-lg" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <h3 className="font-serif text-2xl font-semibold text-foreground mb-2">Play Chapter 1 – Arjuna's Dilemma</h3>
+              <p className="text-sm text-muted-foreground mb-4">Listen to a short narration of the opening chapter — experience the moment that begins the Gita.</p>
+
+              {/* Mock waveform + controls */}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setIsPlaying(prev => !prev)}
+                  className="h-12 w-12 rounded-full flex items-center justify-center bg-wisdom-gold text-black shadow-soft"
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <X className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                </button>
+
+                <div className="flex-1">
+                  <div className="h-10 rounded-md bg-muted/40 flex items-center px-3">
+                    {/* simple animated bars to mimic waveform */}
+                    <div className={`flex gap-1 w-full items-end`}> 
+                      {Array.from({ length: 40 }).map((_, i) => (
+                        <div key={i} className={`bg-foreground/20 rounded-sm`} style={{ width: 3, height: `${isPlaying ? (10 + (i % 8) * 6) : 4}px`, transition: 'height 200ms ease' }} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                    <span>00:00</span>
+                    <span>03:24</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Media Tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+          <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/hardcover')}>
+            <img src={bgCover} alt="Hardcover" className="w-full h-44 object-cover" />
+            <div className="p-4 text-center">
+              <h4 className="text-foreground font-serif">Hardcover</h4>
+            </div>
+          </div>
+
+          <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/ebook')}>
+            <img src={page2Img} alt="E-Book" className="w-full h-44 object-cover" />
+            <div className="p-4 text-center">
+              <h4 className="text-foreground font-serif">E-Book</h4>
+            </div>
+          </div>
+
+          <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/social')}>
+            <img src={originalImg} alt="Animated Series" className="w-full h-44 object-cover" />
+            <div className="p-4 text-center">
+              <h4 className="text-foreground font-serif">Animated Series</h4>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats & Testimonial */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-left">
+            <div className="text-4xl font-serif font-bold text-foreground">10,000+</div>
+            <div className="text-sm text-muted-foreground">SEEKERS</div>
+          </div>
+
+          <div className="flex items-center gap-4 bg-card/60 p-4 rounded-lg border border-border shadow-soft">
+            <img src={page2Img} alt="avatar" className="h-12 w-12 rounded-full object-cover" />
+            <div>
+              <div className="font-semibold text-foreground">Amrita S.</div>
+              <div className="text-sm text-muted-foreground">"Beautifully written and perfect for introducing children to the Gita."</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main Sections Grid */}
       <div className="max-w-7xl mx-auto px-4 py-20">
