@@ -191,12 +191,12 @@ const Eaudio = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-transparent py-16 dark:from-primary/20 dark:via-primary/10 dark:to-transparent">
         <div className="absolute inset-0 opacity-30 dark:opacity-20"></div>
-        
+
         {/* Theme Toggle Button - Top Right */}
         <div className="absolute top-6 right-6 z-10">
           <ThemeToggle />
         </div>
-        
+
         <div className="relative max-w-4xl mx-auto px-4 text-center">
           <Badge variant="outline" className="mb-4 border-primary/20 text-primary dark:border-primary/40 dark:text-primary dark:bg-primary/10">
             Audio Library
@@ -241,7 +241,7 @@ const Eaudio = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Audio Info */}
                 <div className="space-y-3">
                   <div>
@@ -283,7 +283,7 @@ const Eaudio = () => {
 
                   {/* Actions */}
                   <div className="flex gap-3">
-                    <Button 
+                    <Button
                       onClick={() => handleAddToCart(audio)}
                       className="flex-1"
                       variant="default"
@@ -291,8 +291,8 @@ const Eaudio = () => {
                       <Download className="mr-2 h-4 w-4" />
                       Add to Cart
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       className="dark:border-border dark:hover:bg-accent/50"
                     >

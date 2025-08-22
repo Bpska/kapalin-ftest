@@ -64,8 +64,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6 space-y-6 shadow-soft">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+      <Card className="w-full max-w-md p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-soft touch-manipulation">
         <div className="text-center space-y-2">
           <div className="flex justify-center">
             <div className="p-3 rounded-full bg-primary/10">
@@ -87,6 +87,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              className="no-zoom touch-manipulation"
               required
             />
           </div>
@@ -100,6 +101,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                className="no-zoom touch-manipulation pr-12"
                 required
               />
               <Button

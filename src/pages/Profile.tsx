@@ -89,29 +89,29 @@ const Profile = () => {
   ];
 
   return (
-    <div className="px-4 py-6 space-y-6">
-      <h1 className="font-serif text-2xl font-bold text-sage-brown text-center">
+    <div className="container-mobile py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <h1 className="font-serif text-xl sm:text-2xl font-bold text-sage-brown text-center">
         Profile
       </h1>
 
       {/* Profile Header */}
-      <Card className="p-6 shadow-soft border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16">
+      <Card className="card-mobile shadow-soft border-border">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
+            <Avatar className="h-12 w-12 sm:h-16 sm:w-16 flex-shrink-0">
               <AvatarImage src={user?.photoURL || '/placeholder-user.jpg'} />
-              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg font-medium">
+              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-sm sm:text-lg font-medium">
                 {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h2>
-              <p className="text-muted-foreground">{user?.email || 'user@example.com'}</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground truncate">{user?.name || 'User'}</h2>
+              <p className="text-sm sm:text-base text-muted-foreground truncate">{user?.email || 'user@example.com'}</p>
               {user?.phoneNumber && (
-                <p className="text-muted-foreground">{user.phoneNumber}</p>
+                <p className="text-sm text-muted-foreground">{user.phoneNumber}</p>
               )}
               {user?.createdAt && (
-                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   Member since {format(user.createdAt, 'MMM yyyy')}
                 </p>
@@ -122,36 +122,36 @@ const Profile = () => {
             variant="outline"
             size="sm"
             onClick={() => navigate('/profile/edit')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 btn-mobile touch-manipulation w-full sm:w-auto"
           >
             <Edit3 className="h-4 w-4" />
-            Edit Profile
+            <span className="sm:inline">Edit Profile</span>
           </Button>
         </div>
       </Card>
 
       {/* Profile Sections */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {profileSections.map((section) => (
-          <Card key={section.title} className="p-4 shadow-soft border-border">
+          <Card key={section.title} className="card-mobile shadow-soft border-border">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <section.icon className="h-5 w-5 text-primary" />
+              <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
+                <section.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <h3 className="font-medium text-foreground">{section.title}</h3>
-                <p className="text-sm text-muted-foreground">{section.description}</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm sm:text-base font-medium text-foreground">{section.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{section.description}</p>
               </div>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {section.items.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{item.name}</p>
+                <div key={index} className="flex items-center justify-between p-2 sm:p-3 rounded-lg hover:bg-muted/50 active:bg-muted/70 transition-colors cursor-pointer touch-manipulation">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-foreground truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">{item.status}</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </div>
               ))}
             </div>
