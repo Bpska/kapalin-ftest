@@ -12,6 +12,7 @@ interface UploadFormData {
   name: string;
   phone: string;
   instagram: string;
+  
 }
 
 const ImageUpload = () => {
