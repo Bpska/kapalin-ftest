@@ -66,7 +66,55 @@ const Ebook = () => {
   useEffect(() => {
     const fetchEbooks = async () => {
       try {
-        // Use fallback data directly to avoid Supabase type issues
+        const { data, error } = await supabase
+          .from('books')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching books:', error);
+          // Use fallback data if database fails
+          setEbooks([
+            {
+              id: 'ebook-1',
+              title: 'Bhagavad Gita - Digital Edition',
+              description: 'Interactive digital version with audio narration and animated illustrations.',
+              price: 199,
+              currency: 'INR',
+              image_url: gitaImg,
+              author: 'Sage Vyasa',
+              pages: 128,
+              language: 'English',
+              category: 'Spiritual Literature',
+              content_preview: 'Experience the timeless wisdom in a modern digital format.',
+              file_size: '25 MB',
+              download_count: 1250,
+              rating: 4.8
+            }
+          ]);
+        } else {
+          // Transform database data to match component interface
+          const transformedBooks = data.map(book => ({
+            id: book.id,
+            title: book.title,
+            description: book.description || 'No description available',
+            price: book.price,
+            currency: book.currency,
+            image_url: book.image_url || gitaImg,
+            author: book.author || 'Unknown Author',
+            pages: book.pages || 100,
+            language: book.language || 'English',
+            category: book.category || 'Spiritual',
+            content_preview: book.content_preview || 'Preview not available',
+            file_size: '25 MB', // This would need to be added to DB schema
+            download_count: 1250, // This would need to be added to DB schema
+            rating: 4.8 // This would need to be added to DB schema
+          }));
+          setEbooks(transformedBooks);
+        }
+      } catch (error) {
+        console.error('Error fetching ebooks:', error);
+        // Fallback data on error
         setEbooks([
           {
             id: 'ebook-1',
@@ -74,7 +122,7 @@ const Ebook = () => {
             description: 'Interactive digital version with audio narration and animated illustrations.',
             price: 199,
             currency: 'INR',
-            image_url: '/api/placeholder/300/400',
+            image_url: gitaImg,
             author: 'Sage Vyasa',
             pages: 128,
             language: 'English',
@@ -83,26 +131,8 @@ const Ebook = () => {
             file_size: '25 MB',
             download_count: 1250,
             rating: 4.8
-          },
-          {
-            id: 'ebook-2',
-            title: 'Hanuman Chalisa - Interactive',
-            description: 'Digital version with pronunciation guides and meaning explanations.',
-            price: 149,
-            currency: 'INR',
-            image_url: '/api/placeholder/300/400',
-            author: 'Tulsidas',
-            pages: 64,
-            language: 'Hindi/English',
-            category: 'Devotional',
-            content_preview: 'Learn the sacred verses with interactive features.',
-            file_size: '18 MB',
-            download_count: 890,
-            rating: 4.9
           }
         ]);
-      } catch (error) {
-        console.error('Error fetching ebooks:', error);
       } finally {
         setIsLoading(false);
       }

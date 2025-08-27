@@ -58,10 +58,6 @@ const Login = () => {
     }
   };
 
-  const fillDefaultCredentials = () => {
-    setEmail('demo@example.com');
-    setPassword('demo123');
-  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
@@ -129,14 +125,6 @@ const Login = () => {
             {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={fillDefaultCredentials}
-          >
-            Use Test Credentials
-          </Button>
         </form>
 
         <div className="text-center space-y-2">
@@ -149,11 +137,6 @@ const Login = () => {
               Create one
             </Link>
           </p>
-          <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
-            <p><strong>Test credentials:</strong></p>
-            <p>Email: test@example.com</p>
-            <p>Password: password</p>
-          </div>
         </div>
       </Card>
     </div>

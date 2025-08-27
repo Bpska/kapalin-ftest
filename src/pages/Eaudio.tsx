@@ -37,7 +37,58 @@ const Eaudio = () => {
   useEffect(() => {
     const fetchAudios = async () => {
       try {
-        // Use fallback data directly to avoid Supabase type issues
+        const { data, error } = await supabase
+          .from('books')
+          .select('*')
+          .eq('category', 'Audio')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching audio books:', error);
+          // Use fallback data if database fails
+          setAudios([
+            {
+              id: 'audio-1',
+              title: 'Bhagavad Gita - Audio Narration',
+              description: 'Complete audio narration with soothing voice and background music.',
+              price: 299,
+              currency: 'INR',
+              image_url: '/api/placeholder/300/400',
+              author: 'Sage Vyasa',
+              narrator: 'Swami Chinmayananda',
+              duration: '4h 32m',
+              language: 'English',
+              category: 'Spiritual Literature',
+              content_preview: 'Listen to the divine wisdom with expert commentary.',
+              file_size: '125 MB',
+              download_count: 2100,
+              rating: 4.9
+            }
+          ]);
+        } else {
+          // Transform database data to match component interface
+          const transformedAudios = data.map(book => ({
+            id: book.id,
+            title: book.title,
+            description: book.description || 'No description available',
+            price: book.price,
+            currency: book.currency,
+            image_url: book.image_url || '/api/placeholder/300/400',
+            author: book.author || 'Unknown Author',
+            narrator: 'Professional Narrator', // This would need to be added to DB schema
+            duration: '2h 30m', // This would need to be added to DB schema
+            language: book.language || 'English',
+            category: book.category || 'Spiritual',
+            content_preview: book.content_preview || 'Preview not available',
+            file_size: '85 MB', // This would need to be added to DB schema
+            download_count: 1500, // This would need to be added to DB schema
+            rating: 4.8 // This would need to be added to DB schema
+          }));
+          setAudios(transformedAudios);
+        }
+      } catch (error) {
+        console.error('Error fetching audio books:', error);
+        // Fallback data on error
         setAudios([
           {
             id: 'audio-1',
@@ -55,44 +106,8 @@ const Eaudio = () => {
             file_size: '125 MB',
             download_count: 2100,
             rating: 4.9
-          },
-          {
-            id: 'audio-2',
-            title: 'Hanuman Chalisa - Melodious',
-            description: 'Beautifully sung version with traditional ragas and modern beats.',
-            price: 199,
-            currency: 'INR',
-            image_url: '/api/placeholder/300/400',
-            author: 'Tulsidas',
-            narrator: 'Various Artists',
-            duration: '45m',
-            language: 'Hindi',
-            category: 'Devotional',
-            content_preview: 'Experience the power of devotion through music.',
-            file_size: '45 MB',
-            download_count: 1560,
-            rating: 4.8
-          },
-          {
-            id: 'audio-3',
-            title: 'Krishna Stories - For Children',
-            description: 'Engaging stories of Lord Krishna narrated for young minds.',
-            price: 249,
-            currency: 'INR',
-            image_url: '/api/placeholder/300/400',
-            author: 'Various',
-            narrator: 'Storyteller Priya',
-            duration: '2h 15m',
-            language: 'English',
-            category: 'Children',
-            content_preview: 'Magical tales that teach life lessons.',
-            file_size: '68 MB',
-            download_count: 890,
-            rating: 4.7
           }
         ]);
-      } catch (error) {
-        console.error('Error fetching audio books:', error);
       } finally {
         setIsLoading(false);
       }
