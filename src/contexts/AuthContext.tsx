@@ -118,34 +118,57 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string, phoneNumber?: string): Promise<void> => {
-    try {
-      // Use the correct current origin instead of hardcoded URL
-      const redirectUrl = window.location.origin;
-      console.log('Using redirect URL:', redirectUrl);
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            name,
-            phone: phoneNumber
-          }
-        }
-      });
+    const maxRetries = 3;
+    let lastError;
 
-      if (error) {
-        console.error('Registration error details:', error);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Registration attempt ${attempt}/${maxRetries}`);
+        
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+              phone: phoneNumber
+            }
+          }
+        });
+
+        if (error) {
+          console.error(`Registration error (attempt ${attempt}):`, error);
+          if (error.message?.includes('503') || error.message?.includes('Service Unavailable')) {
+            // Retry on 503 errors
+            lastError = error;
+            if (attempt < maxRetries) {
+              console.log(`Retrying in ${attempt * 1000}ms...`);
+              await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+              continue;
+            }
+          }
+          throw error;
+        }
+
+        console.log('Registration successful:', data);
+        return; // Success, exit retry loop
+      } catch (error) {
+        console.error(`Registration failed (attempt ${attempt}):`, error);
+        lastError = error;
+        if (attempt < maxRetries && (
+          error.message?.includes('503') || 
+          error.message?.includes('Service Unavailable') ||
+          error.message?.includes('upstream connect error')
+        )) {
+          console.log(`Retrying in ${attempt * 1000}ms...`);
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+          continue;
+        }
         throw error;
       }
-
-      console.log('Registration successful:', data);
-      // Profile will be created automatically by the trigger
-    } catch (error) {
-      console.error('Registration failed:', error);
-      throw error;
     }
+    
+    throw lastError;
   };
 
   const logout = async (): Promise<void> => {
