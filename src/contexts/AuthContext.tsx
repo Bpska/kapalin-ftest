@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { cleanupAuthState } from '@/lib/authCleanup';
 
 interface User {
   id: string;
@@ -105,6 +106,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
+    // Ensure clean auth state before login
+    cleanupAuthState();
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch {}
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -113,72 +120,86 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) {
       throw error;
     }
-
-    // User state will be updated by the auth state listener
+    // Auth state listener will handle session/user updates
   };
 
   const register = async (name: string, email: string, password: string, phoneNumber?: string): Promise<void> => {
     const maxRetries = 3;
-    let lastError;
+    let lastError: any;
+
+    // Clean stale sessions before sign up to avoid limbo states
+    cleanupAuthState();
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch {}
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Registration attempt ${attempt}/${maxRetries}`);
-        
+        const redirectUrl = `${window.location.origin}/`;
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
+            emailRedirectTo: redirectUrl,
             data: {
               name,
-              phone: phoneNumber
-            }
-          }
+              phone: phoneNumber,
+            },
+          },
         });
 
         if (error) {
           console.error(`Registration error (attempt ${attempt}):`, error);
-          if (error.message?.includes('503') || error.message?.includes('Service Unavailable')) {
-            // Retry on 503 errors
-            lastError = error;
-            if (attempt < maxRetries) {
-              console.log(`Retrying in ${attempt * 1000}ms...`);
-              await new Promise(resolve => setTimeout(resolve, attempt * 1000));
-              continue;
-            }
+          lastError = error as any;
+          const msg = (error as any)?.message || '';
+          if (
+            attempt < maxRetries &&
+            (msg.includes('503') ||
+              msg.includes('Service Unavailable') ||
+              msg.includes('upstream connect error'))
+          ) {
+            console.log(`Retrying in ${attempt * 1000}ms...`);
+            await new Promise((r) => setTimeout(r, attempt * 1000));
+            continue;
           }
           throw error;
         }
 
         console.log('Registration successful:', data);
         return; // Success, exit retry loop
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Registration failed (attempt ${attempt}):`, error);
         lastError = error;
-        if (attempt < maxRetries && (
-          error.message?.includes('503') || 
-          error.message?.includes('Service Unavailable') ||
-          error.message?.includes('upstream connect error')
-        )) {
+        const msg = error?.message || '';
+        if (
+          attempt < maxRetries &&
+          (msg.includes('503') ||
+            msg.includes('Service Unavailable') ||
+            msg.includes('upstream connect error'))
+        ) {
           console.log(`Retrying in ${attempt * 1000}ms...`);
-          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+          await new Promise((r) => setTimeout(r, attempt * 1000));
           continue;
         }
         throw error;
       }
     }
-    
+
     throw lastError;
   };
 
   const logout = async (): Promise<void> => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
+    try {
+      cleanupAuthState();
+      await supabase.auth.signOut({ scope: 'global' });
+    } finally {
+      setUser(null);
+      setSession(null);
+      // Force reload to ensure a clean state
+      window.location.href = '/login';
     }
-    
-    setUser(null);
-    setSession(null);
   };
 
   const value = {
