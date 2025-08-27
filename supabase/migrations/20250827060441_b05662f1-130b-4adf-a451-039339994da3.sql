@@ -1,0 +1,8 @@
+-- Insert sample books data
+INSERT INTO public.books (title, description, price, currency, image_url, author, pages, language, category, content_preview) VALUES
+('Bhagavad Gita - Ancient Wisdom for Young Minds', 'A beautifully illustrated children''s version of the timeless spiritual classic, presenting profound wisdom in simple, accessible language for young readers.', 299, 'INR', '/api/placeholder/300/400', 'Sage Vyasa', 128, 'English', 'Spiritual Literature', 'Discover the eternal teachings of Krishna through colorful illustrations and simple stories that will inspire and guide young minds on their spiritual journey.'),
+('Hanuman Chalisa - Interactive Edition', 'Digital version with pronunciation guides and meaning explanations for children.', 149, 'INR', '/api/placeholder/300/400', 'Tulsidas', 64, 'Hindi/English', 'Devotional', 'Learn the sacred verses with interactive features and beautiful illustrations.'),
+('Krishna Stories - For Children', 'Engaging stories of Lord Krishna narrated for young minds with moral lessons.', 249, 'INR', '/api/placeholder/300/400', 'Various Authors', 96, 'English', 'Children', 'Magical tales that teach life lessons through Krishna''s adventures.'),
+('Bhagavad Gita - Audio Narration', 'Complete audio narration with soothing voice and background music.', 299, 'INR', '/api/placeholder/300/400', 'Sage Vyasa', 0, 'English', 'Audio', 'Listen to the divine wisdom with expert commentary and beautiful background music.'),
+('Hanuman Chalisa - Melodious', 'Beautifully sung version with traditional ragas and modern beats.', 199, 'INR', '/api/placeholder/300/400', 'Tulsidas', 0, 'Hindi', 'Audio', 'Experience the power of devotion through music and traditional chanting.')
+ON CONFLICT (id) DO NOTHING;
