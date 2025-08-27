@@ -119,11 +119,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (name: string, email: string, password: string, phoneNumber?: string): Promise<void> => {
     try {
+      // Use the correct current origin instead of hardcoded URL
+      const redirectUrl = window.location.origin;
+      console.log('Using redirect URL:', redirectUrl);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: redirectUrl,
           data: {
             name,
             phone: phoneNumber
@@ -132,7 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        console.error('Registration error:', error);
+        console.error('Registration error details:', error);
         throw error;
       }
 
