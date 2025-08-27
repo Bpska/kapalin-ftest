@@ -37,95 +37,7 @@ const Eaudio = () => {
   useEffect(() => {
     const fetchAudios = async () => {
       try {
-        const { data, error } = await supabase
-          .from('books')
-          .select('*')
-          .eq('type', 'audio')
-          .limit(6);
-
-        if (error && error.code !== 'PGRST116') {
-          throw error;
-        }
-
-        if (data && data.length > 0) {
-          // Map database data to Eaudio interface with fallbacks
-          const mappedAudios: Eaudio[] = data.map(book => ({
-            id: book.id || `audio-${Date.now()}`,
-            title: book.title || 'Unknown Title',
-            description: book.description || 'No description available',
-            price: book.price || 0,
-            currency: book.currency || 'INR',
-            image_url: book.image_url || '/api/placeholder/300/400',
-            author: book.author || 'Unknown Author',
-            narrator: (book as any).narrator || 'Unknown Narrator',
-            duration: (book as any).duration || 'Unknown Duration',
-            language: book.language || 'English',
-            category: book.category || 'General',
-            content_preview: (book as any).content_preview || book.description || 'No preview available',
-            file_size: (book as any).file_size || 'Unknown Size',
-            download_count: (book as any).download_count || 0,
-            rating: (book as any).rating || 0
-          }));
-          setAudios(mappedAudios);
-        } else {
-          // Fallback data for audio books
-          setAudios([
-            {
-              id: 'audio-1',
-              title: 'Bhagavad Gita - Audio Narration',
-              description: 'Complete audio narration with soothing voice and background music.',
-              price: 299,
-              currency: 'INR',
-              image_url: '/api/placeholder/300/400',
-              author: 'Sage Vyasa',
-              narrator: 'Swami Chinmayananda',
-              duration: '4h 32m',
-              language: 'English',
-              category: 'Spiritual Literature',
-              content_preview: 'Listen to the divine wisdom with expert commentary.',
-              file_size: '125 MB',
-              download_count: 2100,
-              rating: 4.9
-            },
-            {
-              id: 'audio-2',
-              title: 'Hanuman Chalisa - Melodious',
-              description: 'Beautifully sung version with traditional ragas and modern beats.',
-              price: 199,
-              currency: 'INR',
-              image_url: '/api/placeholder/300/400',
-              author: 'Tulsidas',
-              narrator: 'Various Artists',
-              duration: '45m',
-              language: 'Hindi',
-              category: 'Devotional',
-              content_preview: 'Experience the power of devotion through music.',
-              file_size: '45 MB',
-              download_count: 1560,
-              rating: 4.8
-            },
-            {
-              id: 'audio-3',
-              title: 'Krishna Stories - For Children',
-              description: 'Engaging stories of Lord Krishna narrated for young minds.',
-              price: 249,
-              currency: 'INR',
-              image_url: '/api/placeholder/300/400',
-              author: 'Various',
-              narrator: 'Storyteller Priya',
-              duration: '2h 15m',
-              language: 'English',
-              category: 'Children',
-              content_preview: 'Magical tales that teach life lessons.',
-              file_size: '68 MB',
-              download_count: 890,
-              rating: 4.7
-            }
-          ]);
-        }
-      } catch (error) {
-        console.error('Error fetching audio books:', error);
-        // Fallback data
+        // Use fallback data directly to avoid Supabase type issues
         setAudios([
           {
             id: 'audio-1',
@@ -143,8 +55,44 @@ const Eaudio = () => {
             file_size: '125 MB',
             download_count: 2100,
             rating: 4.9
+          },
+          {
+            id: 'audio-2',
+            title: 'Hanuman Chalisa - Melodious',
+            description: 'Beautifully sung version with traditional ragas and modern beats.',
+            price: 199,
+            currency: 'INR',
+            image_url: '/api/placeholder/300/400',
+            author: 'Tulsidas',
+            narrator: 'Various Artists',
+            duration: '45m',
+            language: 'Hindi',
+            category: 'Devotional',
+            content_preview: 'Experience the power of devotion through music.',
+            file_size: '45 MB',
+            download_count: 1560,
+            rating: 4.8
+          },
+          {
+            id: 'audio-3',
+            title: 'Krishna Stories - For Children',
+            description: 'Engaging stories of Lord Krishna narrated for young minds.',
+            price: 249,
+            currency: 'INR',
+            image_url: '/api/placeholder/300/400',
+            author: 'Various',
+            narrator: 'Storyteller Priya',
+            duration: '2h 15m',
+            language: 'English',
+            category: 'Children',
+            content_preview: 'Magical tales that teach life lessons.',
+            file_size: '68 MB',
+            download_count: 890,
+            rating: 4.7
           }
         ]);
+      } catch (error) {
+        console.error('Error fetching audio books:', error);
       } finally {
         setIsLoading(false);
       }
