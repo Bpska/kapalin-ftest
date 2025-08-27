@@ -63,8 +63,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 phoneNumber: profile?.phone || undefined,
                 bio: profile?.bio || undefined,
                 photoURL: profile?.avatar_url || undefined,
-                createdAt: profile?.created_at ? new Date(profile.created_at) : new Date(),
-                updatedAt: profile?.updated_at ? new Date(profile.updated_at) : new Date()
+                createdAt: profile?.created_at ? new Date(profile?.created_at) : new Date(),
+                updatedAt: profile?.updated_at ? new Date(profile?.updated_at) : new Date()
               });
               console.log('User state updated');
             } catch (error) {

@@ -107,6 +107,7 @@ export class SupabaseUserService {
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to insert address');
       return data.id;
     } catch (error) {
       console.error('Error adding address:', error);
@@ -174,6 +175,7 @@ export class SupabaseUserService {
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to insert payment method');
       return data.id;
     } catch (error) {
       console.error('Error adding payment method:', error);
