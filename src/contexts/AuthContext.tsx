@@ -118,23 +118,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string, phoneNumber?: string): Promise<void> => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: {
-          name,
-          phone: phoneNumber
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            name,
+            phone: phoneNumber
+          }
         }
-      }
-    });
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Registration error:', error);
+        throw error;
+      }
+
+      console.log('Registration successful:', data);
+      // Profile will be created automatically by the trigger
+    } catch (error) {
+      console.error('Registration failed:', error);
       throw error;
     }
-
-    // Profile will be created automatically by the trigger
   };
 
   const logout = async (): Promise<void> => {
