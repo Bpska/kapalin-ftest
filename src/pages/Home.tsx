@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import bgCover from '@/assets/original.jpg';
+import bgCover from '@/assets/file_00000000a5ec61f5a878a00b26137500 (1).png';
 import originalImg from '@/assets/original.jpg';
 import page2Img from '@/assets/page-2.jpg';
 import ThemeToggle from '@/components/ThemeToggle';
