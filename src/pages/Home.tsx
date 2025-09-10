@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import bgCover from '@/assets/bhagavad-gita-cover.jpg';
+import bgCover from '@/assets/original.jpg';
 import originalImg from '@/assets/original.jpg';
 import page2Img from '@/assets/page-2.jpg';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -198,8 +198,11 @@ const Home = () => {
                 Wisdom of the Ages
               </Badge>
               <h1 className="font-serif text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
-                Bhagavad Gita for the Next Generation
+                Kapalin Gita Tales for the Next Generation
               </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
+                Ancient wisdom with modern storytelling
+              </p>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
                 Stories for the future — modern, accessible retellings with audio, e-books, and visual experiences.
               </p>
@@ -213,10 +216,10 @@ const Home = () => {
                 </Button>
 
                 <Button
-                  onClick={() => handleNavigation('/eaudio')}
+                  // onClick={() => handleNavigation('/eaudio')}
                   className="h-14 px-6 text-lg font-medium border border-white/10 text-foreground bg-transparent hover:bg-white/3"
                   variant="outline">
-                  Listen to Audio
+                  pree booking
                 </Button>
               </div>
             </div>
@@ -415,18 +418,18 @@ const Home = () => {
 
         {/* Stats & Testimonial */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-left">
+          {/* <div className="text-left">
             <div className="text-4xl font-serif font-bold text-foreground">10,000+</div>
             <div className="text-sm text-muted-foreground">SEEKERS</div>
-          </div>
+          </div> */}
 
-          <div className="flex items-center gap-4 bg-card/60 p-4 rounded-lg border border-border shadow-soft">
+          {/* <div className="flex items-center gap-4 bg-card/60 p-4 rounded-lg border border-border shadow-soft">
             <img src={page2Img} alt="avatar" className="h-12 w-12 rounded-full object-cover" />
             <div>
               <div className="font-semibold text-foreground">Amrita S.</div>
               <div className="text-sm text-muted-foreground">"Beautifully written and perfect for introducing children to the Gita."</div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
