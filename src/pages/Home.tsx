@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import {
   Users, 
   Clock,
   Play,
+  Pause,
   Download,
   ExternalLink,
   X,
@@ -52,6 +53,9 @@ const Home = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Book preview pages data
   const previewPages = [
@@ -174,6 +178,35 @@ const Home = () => {
 
   const prevPage = () => {
     setCurrentPage((prev) => (prev - 1 + previewPages.length) % previewPages.length);
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   if (isLoading) {
@@ -315,7 +348,7 @@ const Home = () => {
       {/* Experience Section (features, audio player, media tiles) */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <h2 className="text-center font-serif text-3xl md:text-4xl font-bold text-foreground mb-8">
-          Experience Kapalin Gita Tales
+          Why Choose Kapalin Gita Tales ?
         </h2>
 
         {/* Feature Row */}
@@ -367,11 +400,11 @@ const Home = () => {
               {/* Mock waveform + controls */}
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setIsPlaying(prev => !prev)}
+                  onClick={handlePlayPause}
                   className="h-12 w-12 rounded-full flex items-center justify-center bg-wisdom-gold text-black shadow-soft"
                   aria-label={isPlaying ? 'Pause' : 'Play'}
                 >
-                  {isPlaying ? <X className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                  {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 </button>
 
                 <div className="flex-1">
@@ -384,8 +417,8 @@ const Home = () => {
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                    <span>00:00</span>
-                    <span>03:24</span>
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
                   </div>
                 </div>
               </div>
@@ -412,8 +445,12 @@ const Home = () => {
           <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/social')}>
             <img src={originalImg} alt="Animated Series" className="w-full h-44 object-cover" />
             <div className="p-4 text-center">
-              <h4 className="text-foreground font-serif">Animated Series</h4>
-            </div>
+  <h4 className="text-foreground font-serif">
+    Animated Series{" "}
+    <span className="text-primary font-semibold">(coming soon)</span>
+  </h4>
+</div>
+
           </div>
         </div>
 
@@ -468,6 +505,14 @@ const Home = () => {
           </div>
         </Card>
       </div>
+
+      <audio
+        ref={audioRef}
+        onLoadedMetadata={handleLoadedMetadata}
+        onTimeUpdate={handleTimeUpdate}
+        src="/intro.mp3"
+        preload="metadata"
+      />
     </div>
   );
 };
