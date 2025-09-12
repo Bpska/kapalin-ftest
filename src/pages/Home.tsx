@@ -232,7 +232,8 @@ const Home = () => {
                 Wisdom of the Ages
               </Badge>
               <h1 className="font-serif text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
-                bhagavad-gita
+               Kapalin Gita Tales
+
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
                 Ancient wisdom with modern storytelling
