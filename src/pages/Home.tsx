@@ -232,7 +232,7 @@ const Home = () => {
                 Wisdom of the Ages
               </Badge>
               <h1 className="font-serif text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
-               Kapalin Gita Tales
+               Kapalin Gita Tales for the Next Generation
 
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
@@ -244,24 +244,31 @@ const Home = () => {
 
               <div className="flex flex-wrap gap-4">
                 <Button
-                  onClick={() => handleNavigation('/ebook')}
+                  onClick={() => handleNavigation('/login')}
                   className="h-14 px-6 text-lg font-medium bg-wisdom-gold text-black hover:brightness-95"
                   variant="default">
                   Buy Now
                 </Button>
 
                 <Button
-                  // onClick={() => handleNavigation('/eaudio')}
+                  onClick={() => handleNavigation('/login')}
                   className="h-14 px-6 text-lg font-medium border border-white/10 text-foreground bg-transparent hover:bg-white/3"
                   variant="outline">
-                  pree booking
+                  pre booking
                 </Button>
               </div>
             </div>
 
             <div className="flex items-center justify-center">
-              <div className="relative w-full max-w-xs md:max-w-sm">
-                <img src={bgCover} alt="Bhagavad Gita Cover" className="w-full rounded-2xl shadow-elevated" />
+              <div className="relative w-full max-w-xs md:max-w-sm group overflow-hidden rounded-2xl">
+                <img
+                  src={bgCover}
+                  alt="Bhagavad Gita Cover"
+                  className="w-full rounded-2xl shadow-elevated transform transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0  bg-opacity-60 rounded-2xl flex items-center justify-center opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+                  {/* <span className="text-white text-lg font-semibold">More Info</span> */}
+                </div>
               </div>
             </div>
           </div>
