@@ -1,0 +1,2 @@
+- [x] Modify "Buy Now" button onClick to navigate('/login')
+- [x] Uncomment and modify "pre booking" button onClick to navigate('/login')
