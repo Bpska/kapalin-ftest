@@ -33,12 +33,12 @@ const Footer = () => {
         setEmail('');
     };
 
-    const socialStats = [
-        { icon: Instagram, count: '4K+', label: 'Followers', color: 'text-pink-500' },
-        { icon: Youtube, count: '2K+', label: 'Subscribers', color: 'text-red-500' },
-        { icon: Facebook, count: '1K+', label: 'Likes', color: 'text-blue-500' },
-        { icon: Twitter, count: '800+', label: 'Followers', color: 'text-sky-500' },
-    ];
+const socialStats = [
+    { icon: Instagram, count: '4K+', label: 'Followers', color: 'text-pink-500', url: 'https://www.instagram.com/kapalingitatales?igsh=ajl0MDg4cGhycnJq' },
+    { icon: Youtube, count: '2K+', label: 'Subscribers', color: 'text-red-500', url: 'https://www.youtube.com/@YourChannelName' },
+    { icon: Facebook, count: '1K+', label: 'Likes', color: 'text-blue-500', url: 'https://www.facebook.com/share/1CLAXpeC6x/' },
+    { icon: Twitter, count: '800+', label: 'Followers', color: 'text-sky-500', url: 'https://x.com/YourTwitterHandle' },
+];
 
     const communityStats = [
         { icon: Users, count: '10,000+', label: 'Active Readers' },
@@ -74,7 +74,14 @@ const Footer = () => {
                         {/* Social Media Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12 md:mb-16">
                             {socialStats.map((social, index) => (
-                                <div key={index} className="group cursor-pointer touch-manipulation">
+                                <a
+                                    key={index}
+                                    href={social.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={social.label}
+                                    className="group cursor-pointer touch-manipulation no-underline"
+                                >
                                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 hover:transform hover:scale-105 active:scale-95">
                                         <div className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-slate-700/50 mb-2 sm:mb-3 md:mb-4 group-hover:bg-slate-600/50 transition-colors ${social.color}`}>
                                             <social.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
@@ -82,7 +89,7 @@ const Footer = () => {
                                         <div className="text-lg sm:text-xl md:text-2xl font-bold mb-1">{social.count}</div>
                                         <div className="text-xs sm:text-sm text-slate-400">{social.label}</div>
                                     </div>
-                                </div>
+                                </a>
                             ))}
                         </div>
 
@@ -100,7 +107,7 @@ const Footer = () => {
                         </div>
 
                         {/* Testimonial */}
-                        <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-700/30 max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16">
+                        {/* <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-700/30 max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16">
                             <div className="flex items-center justify-center mb-6">
                                 <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-0.5">
                                     <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center">
@@ -121,7 +128,7 @@ const Footer = () => {
                                     <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                                 ))}
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
@@ -189,15 +196,15 @@ const Footer = () => {
                                 <div className="space-y-2 sm:space-y-3">
                                     <div className="flex items-center text-slate-300">
                                         <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-blue-400 flex-shrink-0" />
-                                        <span className="text-sm sm:text-base break-all">hello@kapalintales.com</span>
+                                        <span className="text-sm sm:text-base break-all">Kapalingitatales@gmail.com</span>
                                     </div>
                                     <div className="flex items-center text-slate-300">
                                         <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-blue-400 flex-shrink-0" />
-                                        <span className="text-sm sm:text-base">+1 (555) 123-4567</span>
+                                        <span className="text-sm sm:text-base">+91 93379 62617</span>
                                     </div>
                                     <div className="flex items-center text-slate-300">
                                         <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-blue-400 flex-shrink-0" />
-                                        <span className="text-sm sm:text-base">San Francisco, CA</span>
+                                        <span className="text-sm sm:text-base">Odisha, Bhubaneswar</span>
                                     </div>
                                 </div>
                             </div>
@@ -226,6 +233,27 @@ const Footer = () => {
                                     <ChevronUp className="w-4 h-4 mr-1" />
                                     Back to Top
                                 </Button>
+                            </div>
+                            {/* Social Media Links - moved outside to avoid nesting issues */}
+                            <div className="flex items-center justify-center mt-4 gap-4">
+                                <a
+                                    href="https://www.facebook.com/share/1CLAXpeC6x/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Facebook"
+                                    className="text-slate-400 hover:text-blue-500 transition-colors"
+                                >
+                                    <Facebook className="w-6 h-6" />
+                                </a>
+                                <a
+                                    href="https://www.instagram.com/kapalingitatales?igsh=ajl0MDg4cGhycnJq"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Instagram"
+                                    className="text-slate-400 hover:text-pink-500 transition-colors"
+                                >
+                                    <Instagram className="w-6 h-6" />
+                                </a>
                             </div>
                         </div>
                     </div>

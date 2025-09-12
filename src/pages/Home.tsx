@@ -232,7 +232,7 @@ const Home = () => {
                 Wisdom of the Ages
               </Badge>
               <h1 className="font-serif text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
-                Kapalin Gita Tales for the Next Generation
+                bhagavad-gita
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
                 Ancient wisdom with modern storytelling
@@ -409,11 +409,23 @@ const Home = () => {
 
                 <div className="flex-1">
                   <div className="h-10 rounded-md bg-muted/40 flex items-center px-3">
-                    {/* simple animated bars to mimic waveform */}
-                    <div className={`flex gap-1 w-full items-end`}> 
-                      {Array.from({ length: 40 }).map((_, i) => (
-                        <div key={i} className={`bg-foreground/20 rounded-sm`} style={{ width: 3, height: `${isPlaying ? (10 + (i % 8) * 6) : 4}px`, transition: 'height 200ms ease' }} />
-                      ))}
+                    {/* animated waveform bars with smooth flow */}
+                    <div className={`flex gap-1 w-full items-end`}>
+                      {Array.from({ length: 40 }).map((_, i) => {
+                        // Use a sine wave for smooth animation, offset by bar index and currentTime
+                        let height = 4;
+                        if (isPlaying) {
+                          const t = currentTime * 2 + i * 0.25; // speed and offset
+                          height = 18 + Math.sin(t) * 14 + Math.sin(t * 0.7 + i) * 6;
+                        }
+                        return (
+                          <div
+                            key={i}
+                            className="bg-foreground/20 rounded-sm"
+                            style={{ width: 3, height: `${height}px`, transition: 'height 120ms linear' }}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
@@ -429,21 +441,21 @@ const Home = () => {
         {/* Media Tiles */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
           <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/hardcover')}>
-            <img src={bgCover} alt="Hardcover" className="w-full h-44 object-cover" />
+            <img src={bgCover} alt="Hardcover" className="w-48 h-44 object-cover" />
             <div className="p-4 text-center">
               <h4 className="text-foreground font-serif">Hardcover</h4>
             </div>
           </div>
 
           <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/ebook')}>
-            <img src={page2Img} alt="E-Book" className="w-full h-44 object-cover" />
+            <img src={page2Img} alt="E-Book" className="w-48 h-44 object-cover" />
             <div className="p-4 text-center">
               <h4 className="text-foreground font-serif">E-Book</h4>
             </div>
           </div>
 
           <div className="rounded-lg overflow-hidden bg-card/70 border border-border shadow-soft cursor-pointer" onClick={() => handleNavigation('/social')}>
-            <img src={originalImg} alt="Animated Series" className="w-full h-44 object-cover" />
+            <img src={originalImg} alt="Animated Series" className="w-48 h-44 object-cover" />
             <div className="p-4 text-center">
   <h4 className="text-foreground font-serif">
     Animated Series{" "}
