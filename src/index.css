@@ -2,116 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern Cloud Communication Platform Design System 
-Warm, friendly, professional with soft gradients and rounded elements
+/* Kapalin Gita Tales Design System - Premium Children's Book Store
+Warm, wisdom-focused palette with elegant neutrals and soft touches.
 All colors MUST be HSL.
 */
 
 @layer base {
+  /* Remove forced dark mode to allow theme switching */
+  /* html {
+    @apply dark;
+  } */
+  
   :root {
-    /* Background & Surface Colors */
-    --background: 0 0% 100%;
-    --foreground: 223 47% 23%;
-    
-    /* Warm Primary Palette - Soft Purple */
-    --primary: 262 52% 47%;
-    --primary-light: 262 52% 57%;
-    --primary-foreground: 0 0% 100%;
-    
-    /* Secondary Palette - Sky Blue */
-    --secondary: 199 89% 48%;
-    --secondary-light: 199 89% 58%;
-    --secondary-foreground: 0 0% 100%;
-    
-    /* Accent Palette - Blush Pink */
-    --accent: 328 86% 70%;
-    --accent-light: 328 86% 80%;
-    --accent-foreground: 0 0% 100%;
-    
-    /* Neutral Tones */
-    --muted: 220 13% 95%;
-    --muted-light: 220 13% 98%;
-    --muted-foreground: 220 9% 46%;
-    
-    /* Surface Colors */
-    --card: 0 0% 100%;
-    --card-foreground: 223 47% 23%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 223 47% 23%;
-    
-    /* Interactive States */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 52% 47%;
-    
+  /* Core Background & Text - Dark hero-first palette (navy + warm gold) */
+  --background: 225 20% 6%; /* Deep navy / almost black */
+  --foreground: 40 8% 96%; /* Warm off-white for typography */
+
+  /* Card & Surface Colors */
+  --card: 225 18% 10%; /* Slightly lighter than page background */
+  --card-foreground: 40 8% 96%;
+
+    --popover: 39 25% 97%;
+    --popover-foreground: 25 15% 25%;
+
+  /* Primary Brand Colors - Warm Gold accents */
+  --primary: 44 85% 52%; /* Rich gold for CTAs and highlights */
+  --primary-foreground: 210 14% 6%; /* Dark text on gold */
+
+    --secondary: 42 35% 88%; /* Light sand for secondary surfaces */
+    --secondary-foreground: 25 15% 25%;
+
+    /* Muted & Subtle Elements */
+    --muted: 45 20% 92%; /* Very light beige */
+    --muted-foreground: 30 10% 45%; /* Muted brown text */
+
+  /* Accent - Supporting gold / warm cream */
+  --accent: 44 85% 62%;
+  --accent-foreground: 210 14% 6%;
+
     /* Status Colors */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 45 40% 95%;
+
+  /* Interactive Elements */
+  --border: 225 18% 12%; /* Subtle dark border */
+  --input: 225 18% 10%; /* Dark input field background */
+  --ring: 44 85% 52%; /* Gold ring for focus states */
+
     /* Design System Values */
-    --radius: 0.75rem;
-    --radius-lg: 1rem;
-    --radius-xl: 1.5rem;
+    --radius: 0.75rem; /* More rounded for premium feel */
+
+    /* Custom Design Tokens */
+  --wisdom-gold: 44 85% 52%; /* Rich gold highlight */
+  --warm-cream: 44 40% 92%; /* Soft warm cream used sparingly */
+  --sage-brown: 30 18% 35%; /* Deep brown for headings when needed */
     
-    /* Beautiful Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-light)) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary-light)) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent-light)) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 50%, hsl(var(--secondary)) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--muted-light)) 0%, hsl(var(--muted)) 100%);
+    /* Gradients */
+  --gradient-primary: linear-gradient(135deg, hsl(var(--background)), hsl(var(--wisdom-gold)));
+    --gradient-warm: linear-gradient(180deg, hsl(var(--warm-cream)), hsl(var(--card)));
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)));
+
+    /* Shadows */
+  --shadow-soft: 0 6px 30px hsl(0 0% 0% / 0.5);
+  --shadow-warm: 0 10px 40px hsl(var(--wisdom-gold) / 0.12);
+  --shadow-elevated: 0 18px 60px hsl(0 0% 0% / 0.6);
+
+    /* Glass Morphism */
+    --glass-bg: hsl(var(--card) / 0.8);
+    --glass-border: hsl(var(--border) / 0.3);
     
-    /* Elegant Shadows */
-    --shadow-soft: 0 4px 6px -1px hsl(var(--primary) / 0.1), 0 2px 4px -1px hsl(var(--primary) / 0.06);
-    --shadow-medium: 0 10px 15px -3px hsl(var(--primary) / 0.1), 0 4px 6px -2px hsl(var(--primary) / 0.05);
-    --shadow-large: 0 25px 50px -12px hsl(var(--primary) / 0.25);
-    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.05), 0 1px 3px 0 hsl(var(--primary) / 0.1), 0 1px 2px 0 hsl(var(--primary) / 0.06);
-    
-    /* Smooth Transitions */
+    /* Animation Values */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  --sidebar-background: 225 18% 8%;
+  --sidebar-foreground: 40 8% 96%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 223 47% 23%;
-    --foreground: 0 0% 98%;
+  /* When `.dark` is explicit, use slightly warmer/different tone for contrast */
+  --background: 225 18% 8%;
+  --foreground: 40 8% 96%;
 
-    --card: 223 47% 23%;
-    --card-foreground: 0 0% 98%;
+  --card: 225 16% 12%;
+  --card-foreground: 40 8% 96%;
 
-    --popover: 223 47% 23%;
-    --popover-foreground: 0 0% 98%;
+  --popover: 225 16% 12%;
+  --popover-foreground: 40 8% 96%;
 
-    --primary: 262 52% 57%;
-    --primary-light: 262 52% 67%;
-    --primary-foreground: 0 0% 100%;
+  --primary: 44 85% 52%;
+  --primary-foreground: 210 14% 6%;
 
-    --secondary: 199 89% 58%;
-    --secondary-light: 199 89% 68%;
-    --secondary-foreground: 0 0% 100%;
+  --secondary: 225 16% 10%;
+  --secondary-foreground: 40 8% 96%;
 
-    --accent: 328 86% 75%;
-    --accent-light: 328 86% 85%;
-    --accent-foreground: 223 47% 23%;
+  --muted: 225 16% 12%;
+  --muted-foreground: 40 8% 70%;
 
-    --muted: 223 47% 15%;
-    --muted-light: 223 47% 18%;
-    --muted-foreground: 215 20% 65%;
+  --accent: 44 85% 62%;
+  --accent-foreground: 210 14% 6%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+  --destructive: 0 78% 60%;
+  --destructive-foreground: 40 8% 96%;
 
-    --border: 223 47% 15%;
-    --input: 223 47% 15%;
-    --ring: 262 52% 57%;
+  --border: 225 16% 12%;
+  --input: 225 16% 10%;
+  --ring: 44 85% 52%;
 
-    --success: 142 76% 46%;
-    --success-foreground: 0 0% 98%;
-    --warning: 38 92% 60%;
-    --warning-foreground: 223 47% 23%;
+  --wisdom-gold: 44 85% 52%;
+  --warm-cream: 44 40% 92%;
+  --sage-brown: 30 18% 35%;
+
+  --gradient-primary: linear-gradient(135deg, hsl(var(--background)), hsl(var(--wisdom-gold)));
+  --gradient-warm: linear-gradient(180deg, hsl(var(--warm-cream)), hsl(var(--card)));
+  --gradient-subtle: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)));
+
+  --shadow-soft: 0 6px 30px hsl(0 0% 0% / 0.5);
+  --shadow-warm: 0 10px 40px hsl(var(--wisdom-gold) / 0.12);
+  --shadow-elevated: 0 18px 60px hsl(0 0% 0% / 0.6);
+
+  --glass-bg: hsl(var(--card) / 0.7);
+  --glass-border: hsl(var(--border) / 0.3);
   }
 }
 
@@ -121,64 +138,251 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    color-scheme: light dark;
+  }
+
+  /* Ensure all form elements are theme compatible */
+  input, textarea, select {
+    @apply bg-background text-foreground border-border;
+  }
+
+  /* Ensure all buttons have proper theme styling */
+  button {
+    @apply text-foreground;
+  }
+
+  /* Ensure all links are visible in both themes */
+  a {
+    @apply text-primary hover:text-primary/80;
+  }
+
+  /* Ensure all headings are properly visible */
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-foreground;
+  }
+
+  /* Ensure all paragraphs are readable */
+  p {
+    @apply text-foreground;
+  }
+
+  /* Ensure all labels are visible */
+  label {
+    @apply text-foreground;
+  }
+
+  /* Ensure all badges are visible */
+  .badge {
+    @apply text-foreground;
+  }
+
+  /* Ensure all cards have proper theme styling */
+  .card {
+    @apply bg-card text-card-foreground border-border;
+  }
+
+  /* Ensure all modals and overlays are theme-aware */
+  .modal, .overlay {
+    @apply bg-background/95 backdrop-blur-sm;
+  }
+
+  /* Ensure all tooltips are theme-aware */
+  .tooltip {
+    @apply bg-popover text-popover-foreground border-border;
+  }
+
+  /* Ensure all dropdowns are theme-aware */
+  .dropdown {
+    @apply bg-popover text-popover-foreground border-border;
+  }
+
+  /* Ensure all tables are theme-aware */
+  table {
+    @apply bg-card text-card-foreground;
+  }
+
+  th, td {
+    @apply border-border;
+  }
+
+  /* Ensure all scrollbars are theme-aware */
+  ::-webkit-scrollbar {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  /* Ensure all selection is visible */
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Ensure all focus states are visible */
+  :focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
 
-@layer components {
-  /* Gradient Backgrounds */
-  .bg-gradient-primary {
-    background: var(--gradient-primary);
+@layer utilities {
+  /* Mobile-first responsive utilities */
+
+  /* Safe area support for iOS devices */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
   }
-  
-  .bg-gradient-secondary {
-    background: var(--gradient-secondary);
+
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
   }
-  
-  .bg-gradient-accent {
-    background: var(--gradient-accent);
+
+  .safe-area-pl {
+    padding-left: env(safe-area-inset-left);
   }
-  
-  .bg-gradient-warm {
-    background: var(--gradient-warm);
+
+  .safe-area-pr {
+    padding-right: env(safe-area-inset-right);
   }
-  
-  .bg-gradient-hero {
-    background: var(--gradient-hero);
+
+  /* Touch-friendly interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
-  
-  /* Beautiful Shadows */
-  .shadow-soft {
-    box-shadow: var(--shadow-soft);
+
+  /* Improved scrolling on mobile */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
-  
-  .shadow-medium {
-    box-shadow: var(--shadow-medium);
+
+  /* Better text rendering on mobile */
+  .text-rendering-optimized {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
-  
-  .shadow-large {
-    box-shadow: var(--shadow-large);
+
+  /* Prevent zoom on input focus (iOS) */
+  .no-zoom {
+    font-size: 16px;
   }
-  
-  .shadow-glow {
-    box-shadow: var(--shadow-glow);
+
+  /* Mobile-friendly button sizes */
+  .btn-mobile {
+    min-height: 44px;
+    min-width: 44px;
   }
-  
-  /* Smooth Animations */
-  .transition-smooth {
-    transition: var(--transition-smooth);
+
+  /* Mobile-optimized spacing */
+  .space-mobile {
+    padding: 1rem;
   }
-  
-  .transition-bounce {
-    transition: var(--transition-bounce);
+
+  @media (min-width: 640px) {
+    .space-mobile {
+      padding: 1.5rem;
+    }
   }
-  
-  /* Interactive Elements */
-  .hover-lift {
-    @apply transition-smooth hover:transform hover:scale-105 hover:shadow-medium;
+
+  @media (min-width: 768px) {
+    .space-mobile {
+      padding: 2rem;
+    }
   }
-  
-  .hover-glow {
-    @apply transition-smooth hover:shadow-glow;
+
+  /* Responsive containers */
+  .container-mobile {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (min-width: 640px) {
+    .container-mobile {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-mobile {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* Mobile-friendly modals */
+  .modal-mobile {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+
+  @media (min-width: 640px) {
+    .modal-mobile {
+      margin: 2rem;
+      max-height: calc(100vh - 4rem);
+    }
+  }
+
+  /* Mobile-optimized cards */
+  .card-mobile {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  @media (min-width: 640px) {
+    .card-mobile {
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .card-mobile {
+      border-radius: 1.5rem;
+      padding: 2rem;
+    }
+  }
+
+  /* Responsive images */
+  .img-responsive {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .touch-manipulation {
+      transition: none;
+    }
+    
+    .smooth-scroll {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .card-mobile {
+      border: 2px solid;
+    }
+  }
+
+  /* Focus improvements for keyboard navigation */
+  .focus-visible:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
   }
 }
