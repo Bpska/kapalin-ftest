@@ -22,6 +22,12 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ImageUpload from "@/pages/ImageUpload";
 import NotFound from "@/pages/NotFound";
+import AdminRoute from "@/components/AdminRoute";
+import AdminLayout from "@/pages/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import BooksManagement from "@/pages/admin/BooksManagement";
+import AudioManagement from "@/pages/admin/AudioManagement";
+import AnimatedSeriesManagement from "@/pages/admin/AnimatedSeriesManagement";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +105,19 @@ const App = () => (
                     </Layout>
                   </ProtectedRoute>
                 } />
+                
+                {/* Admin routes */}
+                <Route path="/admin" element={
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                }>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="books" element={<BooksManagement />} />
+                  <Route path="audio" element={<AudioManagement />} />
+                  <Route path="animated-series" element={<AnimatedSeriesManagement />} />
+                </Route>
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
