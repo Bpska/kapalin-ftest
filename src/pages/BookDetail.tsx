@@ -83,14 +83,21 @@ const BookDetail = () => {
   }
 
   const handleAddToCart = () => {
+    console.log('🛒 Add to Cart clicked!', { isAuthenticated, book: book?.title });
+    
     if (!isAuthenticated) {
+      console.log('❌ Not authenticated, showing login prompt');
       setLoginPromptFeature('add items to cart');
       setShowLoginPrompt(true);
       return;
     }
     
-    if (!book) return;
+    if (!book) {
+      console.log('❌ No book data');
+      return;
+    }
     
+    console.log('✅ Adding to cart and navigating...');
     addToCart(book);
     toast({
       title: "Added to Cart!",
@@ -100,14 +107,21 @@ const BookDetail = () => {
   };
 
   const handleBuyNow = () => {
+    console.log('💳 Buy Now clicked!', { isAuthenticated, book: book?.title });
+    
     if (!isAuthenticated) {
+      console.log('❌ Not authenticated, showing login prompt');
       setLoginPromptFeature('purchase items');
       setShowLoginPrompt(true);
       return;
     }
     
-    if (!book) return;
+    if (!book) {
+      console.log('❌ No book data');
+      return;
+    }
     
+    console.log('✅ Adding to cart and navigating...');
     addToCart(book);
     navigate('/cart');
   };
