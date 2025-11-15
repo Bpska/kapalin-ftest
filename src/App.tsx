@@ -15,6 +15,8 @@ import Eaudio from "@/pages/Eaudio";
 import Social from "@/pages/Social";
 import FuturePrompts from "@/pages/FuturePrompts";
 import Cart from "@/pages/Cart";
+import Checkout from "@/pages/Checkout";
+import Payment from "@/pages/Payment";
 import Profile from "@/pages/Profile";
 import ProfileEdit from "@/pages/ProfileEdit";
 import BookDetail from "@/pages/BookDetail";
@@ -81,6 +83,20 @@ const App = () => (
                   <ProtectedRoute>
                     <Layout>
                       <Cart />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/checkout" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Checkout />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/checkout/payment" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Payment />
                     </Layout>
                   </ProtectedRoute>
                 } />

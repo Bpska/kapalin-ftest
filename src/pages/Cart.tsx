@@ -4,56 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/use-toast';
-import { orderService } from '@/services/orderService';
 import LoginPrompt from '@/components/LoginPrompt';
 
 const Cart = () => {
-  const { state, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { state, removeFromCart, updateQuantity } = useCart();
   const { isAuthenticated } = useAuth();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!isAuthenticated) {
       setShowLoginPrompt(true);
       return;
     }
-
-    setIsCheckingOut(true);
-    try {
-      // Create order in database
-      const orderId = await orderService.createOrder({
-        total_amount: state.total,
-        currency: 'INR'
-      });
-
-      // Add order items
-      const orderItems = state.items.map(item => ({
-        book_id: item.book.id,
-        book_title: item.book.title,
-        book_price: item.book.price,
-        quantity: item.quantity
-      }));
-
-      await orderService.addOrderItems(orderId, orderItems);
-
-      // Clear cart and show success
-      clearCart();
-      toast({
-        title: "Order Placed Successfully!",
-        description: "Your wisdom tales order has been created. Check your profile for order details.",
-      });
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast({
-        title: "Checkout Failed",
-        description: "There was an error processing your order. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsCheckingOut(false);
-    }
+    // Navigate to checkout page
+    window.location.href = '/checkout';
   };
 
   if (state.items.length === 0) {
@@ -151,10 +115,9 @@ const Cart = () => {
           </div>
           <Button
             onClick={handleCheckout}
-            disabled={isCheckingOut}
             className="w-full btn-mobile bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 touch-manipulation"
           >
-            {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
+            Proceed to Checkout
           </Button>
         </div>
       </Card>
