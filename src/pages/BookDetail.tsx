@@ -83,8 +83,12 @@ const BookDetail = () => {
   }
 
   const handleAddToCart = () => {
-    console.log('Add to Cart clicked', { book, isAuthenticated });
+    console.log('=== ADD TO CART CLICKED ===');
+    console.log('Book data:', book);
+    console.log('Is authenticated:', isAuthenticated);
+    
     if (!isAuthenticated) {
+      console.log('User not authenticated, showing login prompt');
       setLoginPromptFeature('add items to cart');
       setShowLoginPrompt(true);
       return;
@@ -95,17 +99,28 @@ const BookDetail = () => {
       return;
     }
     
-    addToCart(book);
-    toast({
-      title: "Added to Cart!",
-      description: `${book.title} has been added to your cart.`,
-    });
-    navigate('/cart');
+    console.log('Adding book to cart:', book);
+    try {
+      addToCart(book);
+      console.log('Book added to cart successfully');
+      toast({
+        title: "Added to Cart!",
+        description: `${book.title} has been added to your cart.`,
+      });
+      console.log('Navigating to cart...');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
   };
 
   const handleBuyNow = () => {
-    console.log('Buy Now clicked', { book, isAuthenticated });
+    console.log('=== BUY NOW CLICKED ===');
+    console.log('Book data:', book);
+    console.log('Is authenticated:', isAuthenticated);
+    
     if (!isAuthenticated) {
+      console.log('User not authenticated, showing login prompt');
       setLoginPromptFeature('purchase items');
       setShowLoginPrompt(true);
       return;
@@ -116,8 +131,14 @@ const BookDetail = () => {
       return;
     }
     
-    addToCart(book);
-    navigate('/cart');
+    console.log('Adding book to cart for buy now:', book);
+    try {
+      addToCart(book);
+      console.log('Book added, navigating to cart...');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error in buy now:', error);
+    }
   };
 
   const handleViewSamplePages = () => {
@@ -129,6 +150,8 @@ const BookDetail = () => {
     // Sample pages are already visible, so we don't need additional logic here
     // This function is just for the authentication check
   };
+
+  console.log('BookDetail render - handlers created, book:', book?.title);
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -171,16 +194,24 @@ const BookDetail = () => {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button
-          onClick={handleAddToCart}
+          onClick={() => {
+            console.log('Add to Cart button clicked (direct handler)');
+            handleAddToCart();
+          }}
           variant="outline"
           className="flex-1 h-12 border-2"
+          type="button"
         >
           <ShoppingCart className="h-5 w-5 mr-2" />
           Add to Cart
         </Button>
         <Button
-          onClick={handleBuyNow}
+          onClick={() => {
+            console.log('Buy Now button clicked (direct handler)');
+            handleBuyNow();
+          }}
           className="flex-1 bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12"
+          type="button"
         >
           Buy Now
         </Button>
