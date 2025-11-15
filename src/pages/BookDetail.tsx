@@ -26,34 +26,36 @@ const BookDetail = () => {
       if (!id) return;
       
       setLoading(true);
-      try {
-        // Try to fetch from Supabase first
-        const dbBook = await bookService.getBookById(id);
-        
-        if (dbBook) {
-          // Convert database book to local book format
-          setBook({
-            id: dbBook.id,
-            title: dbBook.title,
-            description: dbBook.description || '',
-            price: Number(dbBook.price),
-            image: dbBook.image_url || '',
-            about: dbBook.description || '',
-            samplePages: []
-          });
-        } else {
-          // Fall back to local data
-          const localBook = booksData.find(b => b.id === id);
-          setBook(localBook || null);
+      
+      // Check if ID is a UUID or a local ID
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      if (isUUID) {
+        try {
+          // Try to fetch from Supabase if ID is UUID
+          const dbBook = await bookService.getBookById(id);
+          
+          if (dbBook) {
+            setBook({
+              id: dbBook.id,
+              title: dbBook.title,
+              description: dbBook.description || '',
+              price: Number(dbBook.price),
+              image: dbBook.image_url || '',
+              about: dbBook.description || '',
+              samplePages: []
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching book from database:', error);
         }
-      } catch (error) {
-        console.error('Error fetching book:', error);
-        // Fall back to local data on error
+      } else {
+        // Use local data for non-UUID IDs
         const localBook = booksData.find(b => b.id === id);
         setBook(localBook || null);
-      } finally {
-        setLoading(false);
       }
+      
+      setLoading(false);
     };
 
     fetchBook();
