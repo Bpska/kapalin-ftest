@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { booksData } from '@/data/books';
 import { toast } from '@/components/ui/use-toast';
 import LoginPrompt from '@/components/LoginPrompt';
+import { bookService } from '@/services/bookService';
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -17,8 +18,54 @@ const BookDetail = () => {
   const { isAuthenticated } = useAuth();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [loginPromptFeature, setLoginPromptFeature] = useState('');
+  const [book, setBook] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const book = booksData.find(b => b.id === id);
+  useEffect(() => {
+    const fetchBook = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      try {
+        // Try to fetch from Supabase first
+        const dbBook = await bookService.getBookById(id);
+        
+        if (dbBook) {
+          // Convert database book to local book format
+          setBook({
+            id: dbBook.id,
+            title: dbBook.title,
+            description: dbBook.description || '',
+            price: Number(dbBook.price),
+            image: dbBook.image_url || '',
+            about: dbBook.description || '',
+            samplePages: []
+          });
+        } else {
+          // Fall back to local data
+          const localBook = booksData.find(b => b.id === id);
+          setBook(localBook || null);
+        }
+      } catch (error) {
+        console.error('Error fetching book:', error);
+        // Fall back to local data on error
+        const localBook = booksData.find(b => b.id === id);
+        setBook(localBook || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBook();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="px-4 py-6 text-center">
+        <p className="text-muted-foreground">Loading book details...</p>
+      </div>
+    );
+  }
 
   if (!book) {
     return (
@@ -41,6 +88,17 @@ const BookDetail = () => {
       title: "Added to Cart!",
       description: `${book.title} has been added to your cart.`,
     });
+  };
+
+  const handleBuyNow = () => {
+    if (!isAuthenticated) {
+      setLoginPromptFeature('purchase items');
+      setShowLoginPrompt(true);
+      return;
+    }
+    
+    addToCart(book);
+    navigate('/cart');
   };
 
   const handleViewSamplePages = () => {
@@ -91,13 +149,23 @@ const BookDetail = () => {
         <p className="text-3xl font-bold text-primary">₹{book.price}</p>
       </div>
 
-      {/* Add to Cart */}
-      <Button
-        onClick={handleAddToCart}
-        className="w-full bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12"
-      >
-        Add to Cart
-      </Button>
+      {/* Action Buttons */}
+      <div className="flex gap-3">
+        <Button
+          onClick={handleAddToCart}
+          variant="outline"
+          className="flex-1 h-12 border-2"
+        >
+          <ShoppingCart className="h-5 w-5 mr-2" />
+          Add to Cart
+        </Button>
+        <Button
+          onClick={handleBuyNow}
+          className="flex-1 bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12"
+        >
+          Buy Now
+        </Button>
+      </div>
 
       {/* About the Book */}
       <Card className="p-6 shadow-soft border-border">

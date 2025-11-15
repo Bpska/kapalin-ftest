@@ -454,7 +454,7 @@ const Home = () => {
 
         {/* Media Tiles */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          <div className="rounded-lg overflow-hidden bg-slate-800/50 border border-slate-700/50 shadow-soft cursor-pointer transition-transform hover:scale-105" onClick={() => book && navigate(`/book/${book.id}`)}>
+          <div className="rounded-lg overflow-hidden bg-slate-800/50 border border-slate-700/50 shadow-soft cursor-pointer transition-transform hover:scale-105" onClick={() => navigate('/book/1')}>
             <img src={bgCover} alt="Hardcover" className="w-48 h-44 object-cover" />
             <div className="p-4 text-center">
               <h4 className="text-white font-serif">Hardcover</h4>
