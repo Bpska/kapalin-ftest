@@ -100,6 +100,7 @@ const BookDetail = () => {
       title: "Added to Cart!",
       description: `${book.title} has been added to your cart.`,
     });
+    navigate('/cart');
   };
 
   const handleBuyNow = () => {
