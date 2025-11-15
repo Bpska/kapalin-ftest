@@ -25,10 +25,12 @@ const BookDetail = () => {
     const fetchBook = async () => {
       if (!id) return;
       
+      console.log('Fetching book with ID:', id);
       setLoading(true);
       
       // Check if ID is a UUID or a local ID
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      console.log('Is UUID:', isUUID);
       
       if (isUUID) {
         try {
@@ -51,7 +53,9 @@ const BookDetail = () => {
         }
       } else {
         // Use local data for non-UUID IDs
+        console.log('Loading from local data...');
         const localBook = booksData.find(b => b.id === id);
+        console.log('Local book found:', localBook);
         setBook(localBook || null);
       }
       
@@ -79,9 +83,15 @@ const BookDetail = () => {
   }
 
   const handleAddToCart = () => {
+    console.log('Add to Cart clicked', { book, isAuthenticated });
     if (!isAuthenticated) {
       setLoginPromptFeature('add items to cart');
       setShowLoginPrompt(true);
+      return;
+    }
+    
+    if (!book) {
+      console.error('No book data available');
       return;
     }
     
@@ -93,9 +103,15 @@ const BookDetail = () => {
   };
 
   const handleBuyNow = () => {
+    console.log('Buy Now clicked', { book, isAuthenticated });
     if (!isAuthenticated) {
       setLoginPromptFeature('purchase items');
       setShowLoginPrompt(true);
+      return;
+    }
+    
+    if (!book) {
+      console.error('No book data available');
       return;
     }
     
