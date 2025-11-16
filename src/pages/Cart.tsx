@@ -4,20 +4,40 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 import LoginPrompt from '@/components/LoginPrompt';
 
 const Cart = () => {
   const { state, removeFromCart, updateQuantity } = useCart();
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  const handleRemoveItem = (bookId: string, bookTitle: string) => {
+    removeFromCart(bookId);
+    toast({
+      title: "Removed from Cart",
+      description: `${bookTitle} has been removed from your cart.`,
+    });
+  };
+
+  const handleUpdateQuantity = (bookId: string, bookTitle: string, newQuantity: number) => {
+    updateQuantity(bookId, newQuantity);
+    if (newQuantity === 0) {
+      toast({
+        title: "Removed from Cart",
+        description: `${bookTitle} has been removed from your cart.`,
+      });
+    }
+  };
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
       setShowLoginPrompt(true);
       return;
     }
-    // Navigate to checkout page
-    window.location.href = '/checkout';
+    navigate('/checkout');
   };
 
   if (state.items.length === 0) {
@@ -72,10 +92,12 @@ const Cart = () => {
                 <div className="flex items-center justify-between mt-2 sm:mt-3">
                   <div className="flex items-center space-x-1 sm:space-x-2">
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => updateQuantity(item.book.id, item.quantity - 1)}
+                      onClick={() => handleUpdateQuantity(item.book.id, item.book.title, item.quantity - 1)}
                       className="btn-mobile h-8 w-8 p-0 touch-manipulation"
+                      disabled={item.quantity <= 1}
                     >
                       <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
@@ -83,19 +105,22 @@ const Cart = () => {
                       {item.quantity}
                     </span>
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => updateQuantity(item.book.id, item.quantity + 1)}
+                      onClick={() => handleUpdateQuantity(item.book.id, item.book.title, item.quantity + 1)}
                       className="btn-mobile h-8 w-8 p-0 touch-manipulation"
                     >
                       <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                   <Button
+                    type="button"
                     size="sm"
                     variant="ghost"
-                    onClick={() => removeFromCart(item.book.id)}
-                    className="btn-mobile text-destructive hover:text-destructive touch-manipulation"
+                    onClick={() => handleRemoveItem(item.book.id, item.book.title)}
+                    className="btn-mobile text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation"
+                    aria-label="Remove item"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
