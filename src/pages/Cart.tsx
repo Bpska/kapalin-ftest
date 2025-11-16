@@ -114,10 +114,11 @@ const Cart = () => {
             <span className="text-xl sm:text-2xl font-bold text-primary">₹{state.total}</span>
           </div>
           <Button
+            type="button"
             onClick={handleCheckout}
             className="w-full btn-mobile bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 touch-manipulation"
           >
-            Proceed to Checkout
+            Buy Now
           </Button>
         </div>
       </Card>

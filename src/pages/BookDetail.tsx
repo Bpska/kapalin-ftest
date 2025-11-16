@@ -83,21 +83,14 @@ const BookDetail = () => {
   }
 
   const handleAddToCart = () => {
-    console.log('🛒 Add to Cart clicked!', { isAuthenticated, book: book?.title });
-    
     if (!isAuthenticated) {
-      console.log('❌ Not authenticated, showing login prompt');
       setLoginPromptFeature('add items to cart');
       setShowLoginPrompt(true);
       return;
     }
     
-    if (!book) {
-      console.log('❌ No book data');
-      return;
-    }
+    if (!book) return;
     
-    console.log('✅ Adding to cart and navigating...');
     addToCart(book);
     toast({
       title: "Added to Cart!",
@@ -107,21 +100,14 @@ const BookDetail = () => {
   };
 
   const handleBuyNow = () => {
-    console.log('💳 Buy Now clicked!', { isAuthenticated, book: book?.title });
-    
     if (!isAuthenticated) {
-      console.log('❌ Not authenticated, showing login prompt');
       setLoginPromptFeature('purchase items');
       setShowLoginPrompt(true);
       return;
     }
     
-    if (!book) {
-      console.log('❌ No book data');
-      return;
-    }
+    if (!book) return;
     
-    console.log('✅ Adding to cart and navigating...');
     addToCart(book);
     navigate('/cart');
   };
@@ -175,6 +161,7 @@ const BookDetail = () => {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button
+          type="button"
           onClick={handleAddToCart}
           variant="outline"
           className="flex-1 h-12 border-2"
@@ -183,6 +170,7 @@ const BookDetail = () => {
           Add to Cart
         </Button>
         <Button
+          type="button"
           onClick={handleBuyNow}
           className="flex-1 bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12"
         >
