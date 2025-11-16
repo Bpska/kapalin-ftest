@@ -86,9 +86,14 @@ const Cart = () => {
                 <h3 className="text-sm sm:text-base font-medium text-foreground truncate">
                   {item.book.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  ₹{item.book.price}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    ₹{item.book.price} × {item.quantity}
+                  </p>
+                  <p className="text-sm sm:text-base font-semibold text-foreground">
+                    = ₹{item.book.price * item.quantity}
+                  </p>
+                </div>
                 <div className="flex items-center justify-between mt-2 sm:mt-3">
                   <div className="flex items-center space-x-1 sm:space-x-2">
                     <Button
