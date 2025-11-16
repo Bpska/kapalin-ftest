@@ -83,31 +83,50 @@ const BookDetail = () => {
   }
 
   const handleAddToCart = () => {
+    console.log('🛒 ADD TO CART CLICKED!');
+    console.log('Auth status:', isAuthenticated);
+    console.log('Book data:', book);
+    
     if (!isAuthenticated) {
+      console.log('Not authenticated, showing login prompt');
       setLoginPromptFeature('add items to cart');
       setShowLoginPrompt(true);
       return;
     }
     
-    if (!book) return;
+    if (!book) {
+      console.log('No book data available');
+      return;
+    }
     
+    console.log('Adding book to cart:', book.title);
     addToCart(book);
     toast({
       title: "Added to Cart!",
       description: `${book.title} has been added to your cart.`,
     });
+    console.log('Navigating to /cart');
     navigate('/cart');
   };
 
   const handleBuyNow = () => {
+    console.log('💳 BUY NOW CLICKED!');
+    console.log('Auth status:', isAuthenticated);
+    console.log('Book data:', book);
+    
     if (!isAuthenticated) {
+      console.log('Not authenticated, showing login prompt');
       setLoginPromptFeature('purchase items');
       setShowLoginPrompt(true);
       return;
     }
     
-    if (!book) return;
+    if (!book) {
+      console.log('No book data available');
+      return;
+    }
     
+    console.log('Adding book to cart and navigating:', book.title);
     addToCart(book);
     navigate('/cart');
   };
@@ -159,20 +178,32 @@ const BookDetail = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 relative z-10">
         <Button
           type="button"
-          onClick={handleAddToCart}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔥 BUTTON CLICK EVENT FIRED - Add to Cart');
+            handleAddToCart();
+          }}
           variant="outline"
-          className="flex-1 h-12 border-2"
+          className="flex-1 h-12 border-2 cursor-pointer"
+          style={{ pointerEvents: 'auto' }}
         >
           <ShoppingCart className="h-5 w-5 mr-2" />
           Add to Cart
         </Button>
         <Button
           type="button"
-          onClick={handleBuyNow}
-          className="flex-1 bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔥 BUTTON CLICK EVENT FIRED - Buy Now');
+            handleBuyNow();
+          }}
+          className="flex-1 bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12 cursor-pointer"
+          style={{ pointerEvents: 'auto' }}
         >
           Buy Now
         </Button>
