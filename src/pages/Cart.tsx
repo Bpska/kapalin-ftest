@@ -33,10 +33,13 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    console.log('🛒 Buy Now clicked! Auth status:', isAuthenticated);
     if (!isAuthenticated) {
+      console.log('Not authenticated, showing login prompt');
       setShowLoginPrompt(true);
       return;
     }
+    console.log('Authenticated, navigating to checkout');
     navigate('/checkout');
   };
 
@@ -145,8 +148,14 @@ const Cart = () => {
           </div>
           <Button
             type="button"
-            onClick={handleCheckout}
-            className="w-full btn-mobile bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 touch-manipulation"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔥 Buy Now button clicked!');
+              handleCheckout();
+            }}
+            className="w-full btn-mobile bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 touch-manipulation cursor-pointer"
+            style={{ pointerEvents: 'auto' }}
           >
             Buy Now
           </Button>
