@@ -146,15 +146,13 @@ const Cart = () => {
             <span className="text-base sm:text-lg font-medium">Total</span>
             <span className="text-xl sm:text-2xl font-bold text-primary">₹{state.total}</span>
           </div>
-          <button
-            onClick={() => {
-              alert('Button clicked!'); 
-              handleCheckout();
-            }}
-            className="w-full min-h-[48px] rounded-lg bg-[hsl(var(--wisdom-gold))] text-[hsl(var(--primary-foreground))] font-semibold hover:opacity-90 transition-opacity"
+          <Button
+            onClick={handleCheckout}
+            className="w-full"
+            size="lg"
           >
             Buy Now
-          </button>
+          </Button>
         </div>
       </Card>
       
