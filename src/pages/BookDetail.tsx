@@ -109,28 +109,6 @@ const BookDetail = () => {
     navigate('/cart');
   };
 
-  const handleBuyNow = () => {
-    console.log('💳 BUY NOW CLICKED!');
-    console.log('Auth status:', isAuthenticated);
-    console.log('Book data:', book);
-    
-    if (!isAuthenticated) {
-      console.log('Not authenticated, showing login prompt');
-      setLoginPromptFeature('purchase items');
-      setShowLoginPrompt(true);
-      return;
-    }
-    
-    if (!book) {
-      console.log('No book data available');
-      return;
-    }
-    
-    console.log('Adding book to cart and navigating:', book.title);
-    addToCart(book);
-    navigate('/cart');
-  };
-
   const handleViewSamplePages = () => {
     if (!isAuthenticated) {
       setLoginPromptFeature('view sample pages');
@@ -177,7 +155,7 @@ const BookDetail = () => {
         <p className="text-3xl font-bold text-primary">₹{book.price}</p>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Button */}
       <div className="flex gap-3 relative z-10">
         <Button
           type="button"
@@ -188,24 +166,11 @@ const BookDetail = () => {
             handleAddToCart();
           }}
           variant="outline"
-          className="flex-1 h-12 border-2 cursor-pointer"
+          className="w-full h-12 border-2 cursor-pointer"
           style={{ pointerEvents: 'auto' }}
         >
           <ShoppingCart className="h-5 w-5 mr-2" />
           Add to Cart
-        </Button>
-        <Button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔥 BUTTON CLICK EVENT FIRED - Buy Now');
-            handleBuyNow();
-          }}
-          className="flex-1 bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 h-12 cursor-pointer"
-          style={{ pointerEvents: 'auto' }}
-        >
-          Buy Now
         </Button>
       </div>
 
