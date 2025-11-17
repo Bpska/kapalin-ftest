@@ -146,19 +146,15 @@ const Cart = () => {
             <span className="text-base sm:text-lg font-medium">Total</span>
             <span className="text-xl sm:text-2xl font-bold text-primary">₹{state.total}</span>
           </div>
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('🔥 Buy Now button clicked!');
+          <button
+            onClick={() => {
+              alert('Button clicked!'); 
               handleCheckout();
             }}
-            className="w-full btn-mobile bg-gradient-primary text-primary-foreground shadow-warm hover:opacity-90 transition-all duration-300 touch-manipulation cursor-pointer"
-            style={{ pointerEvents: 'auto' }}
+            className="w-full min-h-[48px] rounded-lg bg-[hsl(var(--wisdom-gold))] text-[hsl(var(--primary-foreground))] font-semibold hover:opacity-90 transition-opacity"
           >
             Buy Now
-          </Button>
+          </button>
         </div>
       </Card>
       
