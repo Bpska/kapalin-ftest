@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 const BottomNavigation = () => {
   const { state } = useCart();
   const { isAuthenticated, logout } = useAuth();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isLoading } = useAdmin();
   const navigate = useNavigate();
   const cartCount = state.items.reduce((total, item) => total + item.quantity, 0);
+
+  console.log('BottomNavigation: isAuthenticated:', isAuthenticated, 'isAdmin:', isAdmin, 'isLoading:', isLoading);
 
   const handleLogout = () => {
     logout();
