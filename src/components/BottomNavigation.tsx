@@ -1,13 +1,15 @@
-import { Home, ShoppingCart, User, LogIn, LogOut, Upload } from 'lucide-react';
+import { Home, ShoppingCart, User, LogIn, LogOut, Upload, Shield } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdmin } from '@/hooks/useAdmin';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 const BottomNavigation = () => {
   const { state } = useCart();
   const { isAuthenticated, logout } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const cartCount = state.items.reduce((total, item) => total + item.quantity, 0);
 
@@ -22,12 +24,14 @@ const BottomNavigation = () => {
       label: 'Upload',
       path: '/upload',
       public: false,
+      adminOnly: false,
     },
     {
       icon: Home,
       label: 'Home',
       path: '/',
       public: true,
+      adminOnly: false,
     },
     {
       icon: ShoppingCart,
@@ -35,12 +39,21 @@ const BottomNavigation = () => {
       path: '/cart',
       badge: cartCount > 0 ? cartCount : undefined,
       public: false,
+      adminOnly: false,
+    },
+    {
+      icon: Shield,
+      label: 'Admin',
+      path: '/admin',
+      public: false,
+      adminOnly: true,
     },
     {
       icon: User,
       label: 'Profile',
       path: '/profile',
       public: false,
+      adminOnly: false,
     },
   ];
 
@@ -50,6 +63,11 @@ const BottomNavigation = () => {
         {navItems.map((item) => {
           // Show all items for authenticated users, only public items for non-authenticated
           if (!isAuthenticated && !item.public) {
+            return null;
+          }
+          
+          // Hide admin-only items if user is not admin
+          if (item.adminOnly && !isAdmin) {
             return null;
           }
           
