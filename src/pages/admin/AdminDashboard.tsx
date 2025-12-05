@@ -1,66 +1,113 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Book, Music, Video, DollarSign, ShoppingCart, TrendingUp, Users } from 'lucide-react';
+import { Book, Music, Video, DollarSign, ShoppingCart, TrendingUp, Users, Loader2 } from 'lucide-react';
 import { bookService } from '@/services/bookService';
 import { adminService } from '@/services/adminService';
+import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { format, subDays } from 'date-fns';
 
-// Mock sales data
-const salesData = [
-  { date: 'Mon', revenue: 4200 },
-  { date: 'Tue', revenue: 3800 },
-  { date: 'Wed', revenue: 5100 },
-  { date: 'Thu', revenue: 4600 },
-  { date: 'Fri', revenue: 6200 },
-  { date: 'Sat', revenue: 7800 },
-  { date: 'Sun', revenue: 5900 },
-];
+interface Order {
+  id: string;
+  user_id: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  customer_name?: string;
+}
 
-const recentOrders = [
-  { id: 'ORD-001', customer: 'Rahul Sharma', amount: 598, status: 'delivered' },
-  { id: 'ORD-002', customer: 'Priya Patel', amount: 299, status: 'shipped' },
-  { id: 'ORD-003', customer: 'Amit Kumar', amount: 897, status: 'processing' },
-  { id: 'ORD-004', customer: 'Sneha Reddy', amount: 299, status: 'pending' },
-];
+interface SalesData {
+  date: string;
+  revenue: number;
+}
 
 const AdminDashboard = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     books: 0,
     audio: 0,
     series: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalCustomers: 0,
   });
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [books, audio, series] = await Promise.all([
-          bookService.getAllBooks(),
-          adminService.getAudioList(),
-          adminService.getAnimatedSeriesList(),
-        ]);
-
-        setStats({
-          books: books.length,
-          audio: audio.length,
-          series: series.length,
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      }
-    };
-
-    fetchStats();
+    fetchAllData();
   }, []);
 
-  const totalRevenue = salesData.reduce((sum, day) => sum + day.revenue, 0);
+  const fetchAllData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch all data in parallel
+      const [books, audio, series, ordersResult, profilesResult] = await Promise.all([
+        bookService.getAllBooks(),
+        adminService.getAudioList(),
+        adminService.getAnimatedSeriesList(),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, name'),
+      ]);
+
+      const orders = ordersResult.data || [];
+      const profiles = profilesResult.data || [];
+
+      // Calculate stats
+      const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+
+      setStats({
+        books: books.length,
+        audio: audio.length,
+        series: series.length,
+        totalOrders: orders.length,
+        totalRevenue,
+        totalCustomers: profiles.length,
+      });
+
+      // Map recent orders with customer names
+      const recentOrdersWithNames = orders.slice(0, 5).map(order => {
+        const profile = profiles.find(p => p.id === order.user_id);
+        return {
+          ...order,
+          customer_name: profile?.name || 'Unknown'
+        };
+      });
+      setRecentOrders(recentOrdersWithNames);
+
+      // Calculate sales data for last 7 days
+      const last7Days: SalesData[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = subDays(new Date(), i);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        const dayLabel = format(date, 'EEE');
+        
+        const dayRevenue = orders
+          .filter(o => o.created_at && o.created_at.startsWith(dateStr))
+          .reduce((sum, o) => sum + (o.total_amount || 0), 0);
+        
+        last7Days.push({ date: dayLabel, revenue: dayRevenue });
+      }
+      setSalesData(last7Days);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const avgOrderValue = stats.totalOrders > 0 
+    ? Math.round(stats.totalRevenue / stats.totalOrders) 
+    : 0;
 
   const statCards = [
-    { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-green-600', change: '+12.5%' },
-    { title: 'Total Orders', value: '107', icon: ShoppingCart, color: 'text-blue-600', change: '+8.2%' },
-    { title: 'Total Books', value: stats.books, icon: Book, color: 'text-purple-600', change: '+3' },
-    { title: 'Total Customers', value: '45', icon: Users, color: 'text-orange-600', change: '+15.3%' },
+    { title: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-green-600' },
+    { title: 'Total Orders', value: stats.totalOrders, icon: ShoppingCart, color: 'text-blue-600' },
+    { title: 'Total Books', value: stats.books, icon: Book, color: 'text-purple-600' },
+    { title: 'Total Customers', value: stats.totalCustomers, icon: Users, color: 'text-orange-600' },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -69,9 +116,18 @@ const AdminDashboard = () => {
       processing: 'default',
       shipped: 'default',
       delivered: 'default',
+      cancelled: 'destructive',
     };
-    return <Badge variant={variants[status]}>{status}</Badge>;
+    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -94,12 +150,6 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-foreground">{stat.value}</div>
-                {stat.change && (
-                  <p className="text-xs text-green-600 flex items-center mt-1">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    {stat.change} from last week
-                  </p>
-                )}
               </CardContent>
             </Card>
           );
@@ -115,15 +165,21 @@ const AdminDashboard = () => {
             <p className="text-sm text-muted-foreground">Last 7 days performance</p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={salesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            {salesData.some(d => d.revenue > 0) ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={salesData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
+                  <Line type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                No revenue data for the last 7 days
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -134,26 +190,34 @@ const AdminDashboard = () => {
             <p className="text-sm text-muted-foreground">Latest customer orders</p>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.customer}</TableCell>
-                    <TableCell>₹{order.amount}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
+            {recentOrders.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-mono text-xs">
+                        {order.id.slice(0, 8)}...
+                      </TableCell>
+                      <TableCell>{order.customer_name}</TableCell>
+                      <TableCell>₹{order.total_amount}</TableCell>
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+                No orders yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -186,7 +250,7 @@ const AdminDashboard = () => {
             <TrendingUp className="h-5 w-5 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">₹{(totalRevenue / 107).toFixed(0)}</div>
+            <div className="text-3xl font-bold">₹{avgOrderValue}</div>
             <p className="text-xs text-muted-foreground mt-1">Per order average</p>
           </CardContent>
         </Card>
