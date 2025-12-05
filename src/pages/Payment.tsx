@@ -5,27 +5,29 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { orderService } from '@/services/orderService';
 import { toast } from '@/components/ui/use-toast';
 
 const Payment = () => {
   const navigate = useNavigate();
   const { state, clearCart } = useCart();
+  const { user } = useAuth();
   const [selectedPayment, setSelectedPayment] = useState('cod');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [addressData, setAddressData] = useState<any>(null);
-
-  useEffect(() => {
-    // Get address from session storage
-    const storedAddress = sessionStorage.getItem('checkoutAddress');
-    if (!storedAddress) {
-      // If no address, redirect back to checkout
-      navigate('/checkout');
-      return;
-    }
-    setAddressData(JSON.parse(storedAddress));
-  }, [navigate]);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phoneNumber || '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    notes: '',
+  });
 
   if (state.items.length === 0) {
     return (
@@ -36,11 +38,22 @@ const Payment = () => {
     );
   }
 
-  const handlePlaceOrder = async () => {
-    if (!addressData) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!formData.name || !formData.phone || !formData.address || !formData.city || !formData.state || !formData.pincode) {
       toast({
-        title: 'Error',
-        description: 'Delivery address not found. Please go back and enter your address.',
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
         variant: 'destructive',
       });
       return;
@@ -64,9 +77,8 @@ const Payment = () => {
 
       await orderService.addOrderItems(orderId, orderItems);
 
-      // Clear cart and session storage
+      // Clear cart
       clearCart();
-      sessionStorage.removeItem('checkoutAddress');
 
       toast({
         title: 'Order Placed Successfully!',
@@ -94,37 +106,13 @@ const Payment = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/checkout')}
+          onClick={() => navigate('/cart')}
           className="p-2"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-serif text-2xl font-bold text-foreground">Payment Options</h1>
+        <h1 className="font-serif text-2xl font-bold text-foreground">Checkout & Payment</h1>
       </div>
-
-      {/* Delivery Address Summary */}
-      {addressData && (
-        <Card className="p-4 mb-6 bg-muted/50">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-semibold mb-2">Delivering to:</h3>
-              <p className="text-sm text-muted-foreground">
-                {addressData.name}<br />
-                {addressData.street}<br />
-                {addressData.city}, {addressData.state} {addressData.zipCode}<br />
-                Phone: {addressData.phone}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/checkout')}
-            >
-              Change
-            </Button>
-          </div>
-        </Card>
-      )}
 
       {/* Order Summary */}
       <Card className="p-4 mb-6 bg-muted/50">
@@ -143,6 +131,131 @@ const Payment = () => {
             <span className="text-primary">₹{state.total}</span>
           </div>
         </div>
+      </Card>
+
+      {/* Delivery Address Form */}
+      <Card className="p-6 mb-6">
+        <h3 className="font-semibold mb-4">Delivery Address</h3>
+        <form onSubmit={handlePlaceOrder} className="space-y-4">
+          <div>
+            <Label htmlFor="name">Full Name *</Label>
+            <Input
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Enter your full name"
+              className="mt-1"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="email">Email *</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter your email"
+              className="mt-1"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone">Phone Number *</Label>
+            <Input
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="10 digit mobile number"
+              className="mt-1"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="address">Street Address *</Label>
+            <Textarea
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="House No., Building Name, Street"
+              className="mt-1"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                placeholder="City"
+                className="mt-1"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="state">State *</Label>
+              <Input
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={handleInputChange}
+                placeholder="State"
+                className="mt-1"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="pincode">PIN Code *</Label>
+              <Input
+                id="pincode"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                placeholder="PIN Code"
+                className="mt-1"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="country">Country *</Label>
+              <Input
+                id="country"
+                name="country"
+                value="India"
+                readOnly
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="notes">Delivery Notes (Optional)</Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleInputChange}
+              placeholder="Any special delivery instructions"
+              className="mt-1"
+            />
+          </div>
+        </form>
       </Card>
 
       {/* Payment Methods */}

@@ -30,6 +30,18 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import BooksManagement from "@/pages/admin/BooksManagement";
 import AudioManagement from "@/pages/admin/AudioManagement";
 import AnimatedSeriesManagement from "@/pages/admin/AnimatedSeriesManagement";
+import OrdersManagement from "@/pages/admin/OrdersManagement";
+import CustomersManagement from "@/pages/admin/CustomersManagement";
+import InventoryManagement from "@/pages/admin/InventoryManagement";
+import Analytics from "@/pages/admin/Analytics";
+import Settings from "@/pages/admin/Settings";
+import Foundation from "@/pages/Foundation";
+import EItems from "@/pages/EItems";
+import Travel from "@/pages/Travel";
+import MyOrders from "@/pages/MyOrders";
+import MyAddresses from "@/pages/MyAddresses";
+import MyPaymentMethods from "@/pages/MyPaymentMethods";
+import EItemsManagement from "@/pages/admin/EItemsManagement";
 
 const queryClient = new QueryClient();
 
@@ -47,9 +59,21 @@ const App = () => (
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                
-                {/* Protected routes with layout */}
+
+                {/* Foundation Page - Public Home */}
                 <Route path="/" element={
+                  <Layout>
+                    <Foundation />
+                  </Layout>
+                } />
+                <Route path="/foundation" element={
+                  <Layout>
+                    <Foundation />
+                  </Layout>
+                } />
+
+                {/* Protected routes with layout */}
+                <Route path="/old-home" element={
                   <Layout>
                     <Home />
                   </Layout>
@@ -62,6 +86,16 @@ const App = () => (
                 <Route path="/eaudio" element={
                   <Layout>
                     <Eaudio />
+                  </Layout>
+                } />
+                <Route path="/e-items" element={
+                  <Layout>
+                    <EItems />
+                  </Layout>
+                } />
+                <Route path="/travel" element={
+                  <Layout>
+                    <Travel />
                   </Layout>
                 } />
                 <Route path="/social" element={
@@ -107,6 +141,27 @@ const App = () => (
                     </Layout>
                   </ProtectedRoute>
                 } />
+                <Route path="/my-orders" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MyOrders />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/my-addresses" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MyAddresses />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/payment-methods" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MyPaymentMethods />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
                 <Route path="/profile/edit" element={
                   <ProtectedRoute>
                     <Layout>
@@ -121,7 +176,16 @@ const App = () => (
                     </Layout>
                   </ProtectedRoute>
                 } />
-                
+
+                {/* Foundation Page */}
+                <Route path="/foundation" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Foundation />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+
                 {/* Admin routes */}
                 <Route path="/admin" element={
                   <AdminRoute>
@@ -132,8 +196,13 @@ const App = () => (
                   <Route path="books" element={<BooksManagement />} />
                   <Route path="audio" element={<AudioManagement />} />
                   <Route path="animated-series" element={<AnimatedSeriesManagement />} />
+                  <Route path="orders" element={<OrdersManagement />} />
+                  <Route path="customers" element={<CustomersManagement />} />
+                  <Route path="inventory" element={<InventoryManagement />} />
+                  <Route path="analytics" element={<Analytics />} />
+                  <Route path="settings" element={<Settings />} />
                 </Route>
-                
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

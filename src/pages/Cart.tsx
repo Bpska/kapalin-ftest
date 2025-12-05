@@ -1,18 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import AddressPrompt from '@/components/AddressPrompt';
+import SupabaseUserService from '@/lib/supabaseUserService';
 import { toast } from '@/hooks/use-toast';
 import LoginPrompt from '@/components/LoginPrompt';
 
 const Cart = () => {
   const { state, removeFromCart, updateQuantity } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showAddressPrompt, setShowAddressPrompt] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const _lastFallbackRef = useRef(false);
+
+  // Debug: Log when component mounts
+  useEffect(() => {
+    console.log('Cart component mounted. Auth:', isAuthenticated, 'User:', user?.id);
+  }, [isAuthenticated, user?.id]);
+
+  // Debug helpers: log pointer events and element at pointer for diagnosing click interception
+  useEffect(() => {
+    const onPointerDownCapture = (e: PointerEvent) => {
+      try {
+        const x = e.clientX;
+        const y = e.clientY;
+        const el = document.elementFromPoint(x, y) as HTMLElement | null;
+        console.log('GLOBAL pointerdown (capture) at', { x, y, target: e.target, topElement: el });
+        if (el) {
+          console.log('Topmost element tag/class/id:', el.tagName, el.className, el.id);
+        }
+      } catch (err) {
+        console.error('Error in pointer debug handler', err);
+      }
+    };
+
+    document.addEventListener('pointerdown', onPointerDownCapture, true);
+    return () => document.removeEventListener('pointerdown', onPointerDownCapture, true);
+  }, []);
 
   const handleRemoveItem = (bookId: string, bookTitle: string) => {
     removeFromCart(bookId);
@@ -32,15 +62,60 @@ const Cart = () => {
     }
   };
 
-  const handleCheckout = () => {
-    console.log('🛒 Buy Now clicked! Auth status:', isAuthenticated);
-    if (!isAuthenticated) {
-      console.log('Not authenticated, showing login prompt');
-      setShowLoginPrompt(true);
-      return;
+  const handleCheckout = async () => {
+    console.log('=== BUY NOW CLICKED ===');
+    console.log('Auth status:', isAuthenticated);
+    console.log('User:', user);
+    
+    setIsLoading(true);
+
+    try {
+      // Check authentication first
+      if (!isAuthenticated) {
+        console.log('User not authenticated - showing login prompt');
+        setShowLoginPrompt(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get user ID
+      const userId = user?.id;
+      if (!userId) {
+        console.log('No user ID found');
+        toast({
+          title: 'Error',
+          description: 'Unable to identify user. Please login again.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Checking addresses for user:', userId);
+
+      // Fetch user addresses
+      const addresses = await SupabaseUserService.getAddresses(userId);
+      console.log('Addresses fetched:', addresses);
+
+      if (!addresses || addresses.length === 0) {
+        console.log('No addresses found - showing address prompt');
+        setShowAddressPrompt(true);
+      } else {
+        console.log('Addresses found - navigating to payment');
+        navigate('/payment');
+      }
+    } catch (error) {
+      console.error('Error in checkout:', error);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Proceeding to payment page.',
+        variant: 'destructive',
+      });
+      // Still allow user to continue to payment
+      navigate('/payment');
+    } finally {
+      setIsLoading(false);
     }
-    console.log('Authenticated, navigating to checkout');
-    navigate('/checkout');
   };
 
   if (state.items.length === 0) {
@@ -68,7 +143,8 @@ const Cart = () => {
   }
 
   return (
-    <div className="container-mobile py-4 sm:py-6 space-y-4 sm:space-y-6">
+    // add bottom padding so fixed bottom nav does not cover the Buy Now button
+    <div className="container-mobile py-4 sm:py-6 space-y-4 sm:space-y-6 pb-28 safe-area-pb">
       <h1 className="font-serif text-xl sm:text-2xl font-bold text-sage-brown text-center">
         Your Cart
       </h1>
@@ -146,13 +222,61 @@ const Cart = () => {
             <span className="text-base sm:text-lg font-medium">Total</span>
             <span className="text-xl sm:text-2xl font-bold text-primary">₹{state.total}</span>
           </div>
-          <Button
-            onClick={handleCheckout}
-            className="w-full"
-            size="lg"
-          >
-            Buy Now
-          </Button>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={handleCheckout}
+              onPointerDown={(e) => {
+                // Log local pointerdown and as a fallback call handleCheckout once
+                try {
+                  const x = (e as any).clientX;
+                  const y = (e as any).clientY;
+                  const el = document.elementFromPoint(x, y) as HTMLElement | null;
+                  console.log('CTA pointerdown', { x, y, target: e.target, topElement: el });
+                } catch (err) {
+                  console.error('CTA pointerdown error', err);
+                }
+                // fallback invoke if click doesn't arrive (debounced by ref)
+                if (!_lastFallbackRef.current && !isLoading) {
+                  _lastFallbackRef.current = true;
+                  // small timeout to allow normal onClick to run if it will
+                  setTimeout(() => { _lastFallbackRef.current = false; }, 1200);
+                }
+              }}
+              disabled={isLoading}
+              type="button"
+              style={{
+                // ensure the CTA sits above any fixed overlays (bottom nav, dialogs)
+                position: 'relative',
+                zIndex: 60,
+                pointerEvents: 'auto',
+                width: '100%',
+                padding: '12px 16px',
+                backgroundColor: '#F59E0B',
+                color: '#78471C',
+                fontSize: '16px',
+                fontWeight: '600',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.7 : 1,
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading) {
+                  (e.target as HTMLButtonElement).style.backgroundColor = '#D97706';
+                  (e.target as HTMLButtonElement).style.transform = 'scale(1.02)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading) {
+                  (e.target as HTMLButtonElement).style.backgroundColor = '#F59E0B';
+                  (e.target as HTMLButtonElement).style.transform = 'scale(1)';
+                }
+              }}
+            >
+              {isLoading ? 'Processing...' : 'Buy Now'}
+            </button>
+          </div>
         </div>
       </Card>
       
@@ -161,6 +285,7 @@ const Cart = () => {
         onOpenChange={setShowLoginPrompt}
         feature="complete your purchase"
       />
+      <AddressPrompt open={showAddressPrompt} onOpenChange={setShowAddressPrompt} />
     </div>
   );
 };

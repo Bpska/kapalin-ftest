@@ -1,39 +1,20 @@
-import { Home, ShoppingCart, User, LogIn, LogOut, Upload, Shield } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Home, ShoppingCart, User, LogIn } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAdmin } from '@/hooks/useAdmin';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 const BottomNavigation = () => {
   const { state } = useCart();
-  const { isAuthenticated, logout } = useAuth();
-  const { isAdmin, isLoading } = useAdmin();
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const cartCount = state.items.reduce((total, item) => total + item.quantity, 0);
 
-  console.log('BottomNavigation: isAuthenticated:', isAuthenticated, 'isAdmin:', isAdmin, 'isLoading:', isLoading);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   const navItems = [
-    {
-      icon: Upload,
-      label: 'Upload',
-      path: '/upload',
-      public: false,
-      adminOnly: false,
-    },
     {
       icon: Home,
       label: 'Home',
       path: '/',
       public: true,
-      adminOnly: false,
     },
     {
       icon: ShoppingCart,
@@ -41,21 +22,12 @@ const BottomNavigation = () => {
       path: '/cart',
       badge: cartCount > 0 ? cartCount : undefined,
       public: false,
-      adminOnly: false,
-    },
-    {
-      icon: Shield,
-      label: 'Admin',
-      path: '/admin',
-      public: false,
-      adminOnly: true,
     },
     {
       icon: User,
       label: 'Profile',
       path: '/profile',
       public: false,
-      adminOnly: false,
     },
   ];
 
@@ -67,12 +39,7 @@ const BottomNavigation = () => {
           if (!isAuthenticated && !item.public) {
             return null;
           }
-          
-          // Hide admin-only items if user is not admin
-          if (item.adminOnly && !isAdmin) {
-            return null;
-          }
-          
+
           return (
             <NavLink
               key={item.path}
@@ -98,9 +65,9 @@ const BottomNavigation = () => {
             </NavLink>
           );
         })}
-        
-        {/* Auth actions */}
-        {!isAuthenticated ? (
+
+        {/* Login Button for non-authenticated users */}
+        {!isAuthenticated && (
           <NavLink
             to="/login"
             className={({ isActive }) =>
@@ -115,16 +82,6 @@ const BottomNavigation = () => {
             <LogIn className="w-6 h-6" />
             <span className="text-xs font-medium">Login</span>
           </NavLink>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="flex flex-col items-center space-y-1 px-2 sm:px-4 py-2 rounded-xl transition-all duration-300 text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted/70 h-auto min-w-[60px] touch-manipulation"
-          >
-            <LogOut className="w-6 h-6" />
-            <span className="text-xs font-medium">Logout</span>
-          </Button>
         )}
       </div>
     </div>

@@ -1,12 +1,18 @@
-# Mobile Responsiveness Fixes for Home.tsx and Footer.tsx
+# Task: Modify Cart and Payment Flow
 
-## Tasks
-- [ ] Adjust hero section text sizes for mobile (reduce from text-5xl to text-4xl on mobile)
-- [ ] Make hero section grid responsive (ensure proper stacking on mobile)
-- [ ] Fix book preview modal layout (remove fixed heights, make responsive)
-- [ ] Adjust experience section grid and spacing for mobile
-- [ ] Make audio player card responsive (stack elements on mobile)
-- [ ] Fix media tiles grid (ensure proper alignment on small screens)
-- [ ] Adjust call to action section padding and button layout for mobile
-- [ ] Review and tweak Footer.tsx for better mobile alignment (text sizes, spacing)
-- [ ] Test overall layout on mobile viewports
+## Objective
+Update the cart page so that clicking "Buy Now" navigates directly to the payment page, where customers can fill in their shipping details and proceed with payment.
+
+## Steps
+- [ ] Update Cart.tsx: Change navigation from '/checkout' to '/payment'
+- [ ] Update Payment.tsx: Integrate shipping address form from Checkout.tsx
+- [ ] Test the new flow: Cart → Payment (with address form and payment options)
+
+## Files to Modify
+- src/pages/Cart.tsx
+- src/pages/Payment.tsx
+
+## Notes
+- Keep authentication check in Cart.tsx
+- Store address data in sessionStorage as before
+- Ensure form validation and error handling

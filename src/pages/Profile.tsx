@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Package, CreditCard, MapPin, HelpCircle, ChevronRight, Calendar, Edit3 } from 'lucide-react';
+import { User, Package, CreditCard, MapPin, HelpCircle, ChevronRight, Calendar, Edit3, LogOut, Settings, Shield } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,10 +7,12 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { SupabaseUserService, Order, Address, PaymentMethod } from '@/lib/supabaseUserService';
+import { useAdmin } from '@/hooks/useAdmin';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { isAdmin } = useAdmin();
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -24,7 +26,7 @@ const Profile = () => {
 
   const loadUserData = async () => {
     if (!user) return;
-    
+
     setIsLoading(true);
     try {
       const [userOrders, userAddresses, userPaymentMethods] = await Promise.all([
@@ -32,7 +34,7 @@ const Profile = () => {
         SupabaseUserService.getAddresses(user.id),
         SupabaseUserService.getPaymentMethods(user.id)
       ]);
-      
+
       setOrders(userOrders);
       setAddresses(userAddresses);
       setPaymentMethods(userPaymentMethods);
@@ -42,7 +44,7 @@ const Profile = () => {
       setIsLoading(false);
     }
   };
-  
+
   const profileSections = [
     {
       icon: Package,
@@ -85,8 +87,37 @@ const Profile = () => {
         { name: 'FAQ', status: 'Common questions' },
         { name: 'Contact Us', status: 'Get in touch' },
       ]
+    },
+    {
+      icon: Settings,
+      title: 'Settings',
+      description: 'Account preferences',
+      items: [
+        { name: 'Notifications', status: 'Manage alerts' },
+        { name: 'Privacy', status: 'Your data' },
+      ]
     }
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  const handleSectionClick = (sectionTitle: string) => {
+    const routes: Record<string, string> = {
+      'My Orders': '/my-orders',
+      'Payment Methods': '/payment-methods',
+      'Shipping Addresses': '/my-addresses',
+      'Help & Support': '/help',
+      'Settings': '/account-settings'
+    };
+
+    const route = routes[sectionTitle];
+    if (route) {
+      navigate(route);
+    }
+  };
 
   return (
     <div className="container-mobile py-4 sm:py-6 space-y-4 sm:space-y-6">
@@ -143,10 +174,14 @@ const Profile = () => {
                 <p className="text-xs sm:text-sm text-muted-foreground">{section.description}</p>
               </div>
             </div>
-            
+
             <div className="space-y-1 sm:space-y-2">
               {section.items.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-2 sm:p-3 rounded-lg hover:bg-muted/50 active:bg-muted/70 transition-colors cursor-pointer touch-manipulation">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 sm:p-3 rounded-lg hover:bg-muted/50 active:bg-muted/70 transition-colors cursor-pointer touch-manipulation"
+                  onClick={() => handleSectionClick(section.title)}
+                >
                   <div className="min-w-0 flex-1">
                     <p className="text-xs sm:text-sm font-medium text-foreground truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">{item.status}</p>
@@ -158,6 +193,32 @@ const Profile = () => {
           </Card>
         ))}
       </div>
+
+      {/* Admin Panel Button - Only for Admin Users */}
+      {isAdmin && (
+        <Card className="card-mobile shadow-soft border-border border-primary/30">
+          <Button
+            variant="default"
+            className="w-full flex items-center justify-center gap-2 btn-mobile touch-manipulation bg-primary hover:bg-primary/90"
+            onClick={() => navigate('/admin')}
+          >
+            <Shield className="h-4 w-4" />
+            Admin Panel
+          </Button>
+        </Card>
+      )}
+
+      {/* Logout Button */}
+      <Card className="card-mobile shadow-soft border-border">
+        <Button
+          variant="destructive"
+          className="w-full flex items-center justify-center gap-2 btn-mobile touch-manipulation"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </Card>
     </div>
   );
 };

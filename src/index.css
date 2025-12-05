@@ -1,3 +1,8 @@
+/* DEBUG: highlight and disable pointer events for overlays covering the page */
+.absolute.inset-0 {
+  outline: 2px solid red !important;
+  pointer-events: none !important;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
