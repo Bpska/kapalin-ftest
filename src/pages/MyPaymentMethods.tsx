@@ -103,11 +103,11 @@ const MyPaymentMethods = () => {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    {method.card_last4 && (
-                                        <p className="text-sm font-mono">{maskCardNumber(method.card_last4)}</p>
+                                    {method.details?.card_last4 && (
+                                        <p className="text-sm font-mono">{maskCardNumber(method.details.card_last4)}</p>
                                     )}
-                                    {method.card_expiry && (
-                                        <p className="text-sm text-muted-foreground">Expires: {method.card_expiry}</p>
+                                    {method.details?.card_expiry && (
+                                        <p className="text-sm text-muted-foreground">Expires: {method.details.card_expiry}</p>
                                     )}
                                     {!method.is_default && (
                                         <Button variant="outline" className="w-full" size="sm">

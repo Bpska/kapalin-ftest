@@ -4,103 +4,61 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Package, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Package, TrendingDown, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { bookService } from '@/services/bookService';
 
-interface InventoryItem {
+interface Book {
     id: string;
-    bookTitle: string;
-    sku: string;
-    stock: number;
-    lowStockThreshold: number;
+    title: string;
     price: number;
-    status: 'in-stock' | 'low-stock' | 'out-of-stock';
+    book_type: string | null;
+    author?: string | null;
+    category?: string | null;
+    image_url?: string | null;
 }
 
-// Mock data
-const mockInventory: InventoryItem[] = [
-    {
-        id: '1',
-        bookTitle: 'Bhagavad Gita - Ancient Wisdom for Young Minds',
-        sku: 'BG-001',
-        stock: 150,
-        lowStockThreshold: 20,
-        price: 299,
-        status: 'in-stock'
-    },
-    {
-        id: '2',
-        bookTitle: 'Ramayana Tales for Children',
-        sku: 'RM-001',
-        stock: 15,
-        lowStockThreshold: 20,
-        price: 349,
-        status: 'low-stock'
-    },
-    {
-        id: '3',
-        bookTitle: 'Mahabharata Stories',
-        sku: 'MB-001',
-        stock: 0,
-        lowStockThreshold: 20,
-        price: 399,
-        status: 'out-of-stock'
-    },
-    {
-        id: '4',
-        bookTitle: 'Panchatantra Collection',
-        sku: 'PT-001',
-        stock: 85,
-        lowStockThreshold: 20,
-        price: 249,
-        status: 'in-stock'
-    },
-];
-
 const InventoryManagement = () => {
-    const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [editStock, setEditStock] = useState<number>(0);
+    const [books, setBooks] = useState<Book[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleUpdateStock = (id: string, newStock: number) => {
-        setInventory((prev) =>
-            prev.map((item) => {
-                if (item.id === id) {
-                    let status: InventoryItem['status'] = 'in-stock';
-                    if (newStock === 0) status = 'out-of-stock';
-                    else if (newStock <= item.lowStockThreshold) status = 'low-stock';
+    useEffect(() => {
+        loadBooks();
+    }, []);
 
-                    return { ...item, stock: newStock, status };
-                }
-                return item;
-            })
+    const loadBooks = async () => {
+        setIsLoading(true);
+        try {
+            const data = await bookService.getAllBooks();
+            setBooks(data || []);
+        } catch (error) {
+            console.error('Error loading books:', error);
+            toast.error('Failed to load inventory');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const totalItems = books.length;
+    const hardcoverBooks = books.filter(b => b.book_type === 'hardcover' || b.book_type === 'both').length;
+    const ebookBooks = books.filter(b => b.book_type === 'ebook' || b.book_type === 'both').length;
+    const totalValue = books.reduce((sum, book) => sum + book.price, 0);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
         );
-        setEditingId(null);
-        toast.success('Stock updated successfully');
-    };
-
-    const getStatusBadge = (status: InventoryItem['status']) => {
-        const variants: Record<InventoryItem['status'], { variant: any; label: string }> = {
-            'in-stock': { variant: 'default', label: 'In Stock' },
-            'low-stock': { variant: 'secondary', label: 'Low Stock' },
-            'out-of-stock': { variant: 'destructive', label: 'Out of Stock' },
-        };
-
-        const { variant, label } = variants[status];
-        return <Badge variant={variant}>{label}</Badge>;
-    };
-
-    const totalItems = inventory.length;
-    const lowStockItems = inventory.filter((i) => i.status === 'low-stock').length;
-    const outOfStockItems = inventory.filter((i) => i.status === 'out-of-stock').length;
-    const totalValue = inventory.reduce((sum, item) => sum + (item.stock * item.price), 0);
+    }
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold">Inventory Management</h1>
-                    <p className="text-muted-foreground">Track and manage product stock levels</p>
+                    <p className="text-muted-foreground">View all books in your catalog</p>
                 </div>
             </div>
 
@@ -108,7 +66,7 @@ const InventoryManagement = () => {
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total Books</CardTitle>
                         <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -117,25 +75,23 @@ const InventoryManagement = () => {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-                        <TrendingDown className="h-4 w-4 text-yellow-600" />
+                        <CardTitle className="text-sm font-medium">Hardcover</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-yellow-600">{lowStockItems}</div>
+                        <div className="text-2xl font-bold">{hardcoverBooks}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <CardTitle className="text-sm font-medium">E-Books</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-red-600">{outOfStockItems}</div>
+                        <div className="text-2xl font-bold">{ebookBooks}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Total Value</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total Catalog Value</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₹{totalValue.toLocaleString()}</div>
@@ -146,75 +102,53 @@ const InventoryManagement = () => {
             {/* Inventory Table */}
             <Card>
                 <CardContent className="pt-6">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead>SKU</TableHead>
-                                <TableHead>Current Stock</TableHead>
-                                <TableHead>Low Stock Alert</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Value</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {inventory.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="font-medium">{item.bookTitle}</TableCell>
-                                    <TableCell>{item.sku}</TableCell>
-                                    <TableCell>
-                                        {editingId === item.id ? (
-                                            <Input
-                                                type="number"
-                                                value={editStock}
-                                                onChange={(e) => setEditStock(parseInt(e.target.value) || 0)}
-                                                className="w-20"
-                                                autoFocus
-                                            />
-                                        ) : (
-                                            item.stock
-                                        )}
-                                    </TableCell>
-                                    <TableCell>{item.lowStockThreshold}</TableCell>
-                                    <TableCell>₹{item.price}</TableCell>
-                                    <TableCell>₹{(item.stock * item.price).toLocaleString()}</TableCell>
-                                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                    <TableCell>
-                                        {editingId === item.id ? (
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => handleUpdateStock(item.id, editStock)}
-                                                >
-                                                    Save
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setEditingId(null)}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => {
-                                                    setEditingId(item.id);
-                                                    setEditStock(item.stock);
-                                                }}
-                                            >
-                                                Update
-                                            </Button>
-                                        )}
-                                    </TableCell>
+                    {books.length === 0 ? (
+                        <div className="text-center py-12">
+                            <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                            <p className="text-muted-foreground">No books in inventory</p>
+                            <p className="text-sm text-muted-foreground mt-2">
+                                Add books from the Books Management page
+                            </p>
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Book</TableHead>
+                                    <TableHead>Author</TableHead>
+                                    <TableHead>Category</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Price</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {books.map((book) => (
+                                    <TableRow key={book.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                {book.image_url && (
+                                                    <img 
+                                                        src={book.image_url} 
+                                                        alt={book.title}
+                                                        className="w-10 h-14 object-cover rounded"
+                                                    />
+                                                )}
+                                                <span className="font-medium">{book.title}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{book.author || 'N/A'}</TableCell>
+                                        <TableCell>{book.category || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className="capitalize">
+                                                {book.book_type}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="font-semibold">₹{book.price}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>

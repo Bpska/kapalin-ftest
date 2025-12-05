@@ -5,13 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Package, ChevronLeft, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { SupabaseUserService, Order } from '@/lib/supabaseUserService';
+import { SupabaseUserService, Order, OrderItem } from '@/lib/supabaseUserService';
 import { format } from 'date-fns';
+
+interface OrderWithItems extends Order {
+    items?: OrderItem[];
+}
 
 const MyOrders = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<OrderWithItems[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -26,7 +30,16 @@ const MyOrders = () => {
         setIsLoading(true);
         try {
             const userOrders = await SupabaseUserService.getUserOrders(user.id);
-            setOrders(userOrders);
+            
+            // Fetch items for each order
+            const ordersWithItems = await Promise.all(
+                userOrders.map(async (order) => {
+                    const items = await SupabaseUserService.getOrderItems(order.id);
+                    return { ...order, items };
+                })
+            );
+            
+            setOrders(ordersWithItems);
         } catch (error) {
             console.error('Error loading orders:', error);
         } finally {
@@ -104,9 +117,9 @@ const MyOrders = () => {
                                     {order.items && order.items.length > 0 && (
                                         <div className="border-t pt-3">
                                             <p className="text-sm font-medium mb-2">Items ({order.items.length})</p>
-                                            {order.items.slice(0, 2).map((item: any, idx: number) => (
-                                                <div key={idx} className="text-sm text-muted-foreground">
-                                                    • {item.title || item.name}
+                                            {order.items.slice(0, 2).map((item) => (
+                                                <div key={item.id} className="text-sm text-muted-foreground">
+                                                    • {item.book_title} (x{item.quantity})
                                                 </div>
                                             ))}
                                             {order.items.length > 2 && (

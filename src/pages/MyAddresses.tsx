@@ -96,13 +96,10 @@ const MyAddresses = () => {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-2 text-sm">
-                                    <p>{address.address_line1}</p>
-                                    {address.address_line2 && <p>{address.address_line2}</p>}
-                                    <p>{address.city}, {address.state} {address.postal_code}</p>
+                                    <p>{address.street}</p>
+                                    <p>{address.city}, {address.state} {address.zip_code}</p>
                                     <p className="text-muted-foreground">{address.country}</p>
-                                    {address.phone && (
-                                        <p className="text-muted-foreground">Phone: {address.phone}</p>
-                                    )}
+                                    <p className="text-muted-foreground capitalize">Type: {address.type}</p>
                                 </div>
                                 {!address.is_default && (
                                     <Button variant="outline" className="w-full mt-4" size="sm">
