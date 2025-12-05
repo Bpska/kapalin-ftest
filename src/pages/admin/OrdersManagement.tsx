@@ -11,6 +11,15 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
+interface CustomerAddress {
+    street: string;
+    city: string;
+    state: string;
+    zip_code: string;
+    country: string;
+    name: string;
+}
+
 interface Order {
     id: string;
     user_id: string;
@@ -19,8 +28,11 @@ interface Order {
     status: string;
     payment_status: string;
     created_at: string;
+    shipping_address_id: string | null;
     customer_name?: string;
+    customer_phone?: string;
     customer_email?: string;
+    customer_address?: CustomerAddress | null;
     items_count?: number;
 }
 
@@ -56,25 +68,49 @@ const OrdersManagement = () => {
 
             if (ordersError) throw ordersError;
 
-            // Fetch profiles for customer names
+            // Fetch profiles for customer names and phone
             const { data: profilesData } = await supabase
                 .from('profiles')
-                .select('id, name');
+                .select('id, name, phone');
 
             // Fetch order items count
             const { data: itemsData } = await supabase
                 .from('order_items')
                 .select('order_id, quantity');
 
-            // Map orders with customer info and items count
+            // Fetch addresses
+            const { data: addressesData } = await supabase
+                .from('addresses')
+                .select('*');
+
+            // Map orders with customer info, address and items count
             const ordersWithInfo = (ordersData || []).map(order => {
                 const profile = profilesData?.find(p => p.id === order.user_id);
                 const orderItemsList = itemsData?.filter(i => i.order_id === order.id) || [];
                 const itemsCount = orderItemsList.reduce((sum, i) => sum + i.quantity, 0);
                 
+                // Get shipping address - either from shipping_address_id or user's default address
+                let address = null;
+                if (order.shipping_address_id) {
+                    address = addressesData?.find(a => a.id === order.shipping_address_id);
+                } else {
+                    // Get user's default address or first address
+                    const userAddresses = addressesData?.filter(a => a.user_id === order.user_id) || [];
+                    address = userAddresses.find(a => a.is_default) || userAddresses[0];
+                }
+                
                 return {
                     ...order,
                     customer_name: profile?.name || 'Unknown',
+                    customer_phone: profile?.phone || '',
+                    customer_address: address ? {
+                        street: address.street,
+                        city: address.city,
+                        state: address.state,
+                        zip_code: address.zip_code,
+                        country: address.country,
+                        name: address.name,
+                    } : null,
                     items_count: itemsCount
                 };
             });
@@ -361,6 +397,12 @@ const OrdersManagement = () => {
                                     </p>
                                 </div>
                                 <div>
+                                    <label className="text-sm font-medium">Mobile Number</label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {selectedOrder.customer_phone || 'Not provided'}
+                                    </p>
+                                </div>
+                                <div>
                                     <label className="text-sm font-medium">Payment Status</label>
                                     <p className="text-sm text-muted-foreground capitalize">
                                         {selectedOrder.payment_status}
@@ -373,6 +415,24 @@ const OrdersManagement = () => {
                                     </p>
                                 </div>
                             </div>
+
+                            {/* Shipping Address */}
+                            {selectedOrder.customer_address && (
+                                <div className="border-t pt-4">
+                                    <label className="text-sm font-medium mb-2 block">Shipping Address</label>
+                                    <div className="bg-muted p-3 rounded-md space-y-1">
+                                        <p className="font-medium">{selectedOrder.customer_address.name}</p>
+                                        <p className="text-sm text-muted-foreground">{selectedOrder.customer_address.street}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {selectedOrder.customer_address.city}, {selectedOrder.customer_address.state}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            PIN: {selectedOrder.customer_address.zip_code}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">{selectedOrder.customer_address.country}</p>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Order Items */}
                             {orderItems.length > 0 && (

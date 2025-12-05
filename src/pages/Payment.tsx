@@ -11,6 +11,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { orderService } from '@/services/orderService';
 import { toast } from '@/components/ui/use-toast';
+import SupabaseUserService from '@/lib/supabaseUserService';
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -59,15 +60,43 @@ const Payment = () => {
       return;
     }
 
+    if (!user?.id) {
+      toast({
+        title: 'Not Authenticated',
+        description: 'Please login to place an order.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      // Create order in database
+      // 1. Save or get the shipping address
+      const addressId = await SupabaseUserService.addAddress(user.id, {
+        type: 'home',
+        name: formData.name,
+        street: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip_code: formData.pincode,
+        country: 'India',
+        is_default: true,
+      });
+
+      // 2. Update user profile with phone number
+      await SupabaseUserService.updateUserProfile(user.id, { 
+        phone: formData.phone,
+        name: formData.name 
+      });
+
+      // 3. Create order with shipping address
       const orderId = await orderService.createOrder({
         total_amount: state.total,
         currency: 'INR',
+        shipping_address_id: addressId,
       });
 
-      // Add order items
+      // 4. Add order items
       const orderItems = state.items.map(item => ({
         book_id: item.book.id,
         book_title: item.book.title,
