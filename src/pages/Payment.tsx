@@ -114,8 +114,8 @@ const Payment = () => {
         description: `Your order has been placed with ${selectedPayment === 'cod' ? 'Cash on Delivery' : selectedPayment.toUpperCase()} payment method.`,
       });
 
-      // Navigate to success page or home
-      navigate('/');
+      // Navigate to my orders page
+      navigate('/my-orders');
     } catch (error) {
       console.error('Order placement error:', error);
       toast({

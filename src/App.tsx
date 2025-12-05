@@ -134,6 +134,13 @@ const App = () => (
                     </Layout>
                   </ProtectedRoute>
                 } />
+                <Route path="/payment" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Payment />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
                 <Route path="/profile" element={
                   <ProtectedRoute>
                     <Layout>
