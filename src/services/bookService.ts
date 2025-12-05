@@ -12,6 +12,7 @@ export interface BookData {
   language: string | null;
   category: string | null;
   content_preview: string | null;
+  book_type: string | null;
   created_at: string;
   updated_at: string;
 }

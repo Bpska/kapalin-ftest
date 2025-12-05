@@ -4,80 +4,74 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Search, Eye, Users, TrendingUp } from 'lucide-react';
+import { Search, Eye, Users, TrendingUp, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 interface Customer {
     id: string;
     name: string;
-    email: string;
-    phone: string;
+    phone?: string;
+    created_at: string;
     totalOrders: number;
     totalSpent: number;
-    joinDate: string;
-    status: 'active' | 'inactive';
 }
 
-// Mock data
-const mockCustomers: Customer[] = [
-    {
-        id: '1',
-        name: 'Rahul Sharma',
-        email: 'rahul@example.com',
-        phone: '+91 98765 43210',
-        totalOrders: 5,
-        totalSpent: 1495,
-        joinDate: '2024-01-15',
-        status: 'active'
-    },
-    {
-        id: '2',
-        name: 'Priya Patel',
-        email: 'priya@example.com',
-        phone: '+91 98765 43211',
-        totalOrders: 3,
-        totalSpent: 897,
-        joinDate: '2024-02-20',
-        status: 'active'
-    },
-    {
-        id: '3',
-        name: 'Amit Kumar',
-        email: 'amit@example.com',
-        phone: '+91 98765 43212',
-        totalOrders: 8,
-        totalSpent: 2392,
-        joinDate: '2024-01-10',
-        status: 'active'
-    },
-    {
-        id: '4',
-        name: 'Sneha Reddy',
-        email: 'sneha@example.com',
-        phone: '+91 98765 43213',
-        totalOrders: 1,
-        totalSpent: 299,
-        joinDate: '2024-11-30',
-        status: 'active'
-    },
-    {
-        id: '5',
-        name: 'Vikram Singh',
-        email: 'vikram@example.com',
-        phone: '+91 98765 43214',
-        totalOrders: 0,
-        totalSpent: 0,
-        joinDate: '2024-12-01',
-        status: 'inactive'
-    },
-];
-
 const CustomersManagement = () => {
-    const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-    const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>(mockCustomers);
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        loadCustomers();
+    }, []);
+
+    const loadCustomers = async () => {
+        setIsLoading(true);
+        try {
+            // Fetch profiles
+            const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (profilesError) throw profilesError;
+
+            // Fetch orders for aggregation
+            const { data: ordersData } = await supabase
+                .from('orders')
+                .select('user_id, total_amount');
+
+            // Map customers with order stats
+            const customersWithStats = (profilesData || []).map(profile => {
+                const userOrders = ordersData?.filter(o => o.user_id === profile.id) || [];
+                const totalOrders = userOrders.length;
+                const totalSpent = userOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+
+                return {
+                    id: profile.id,
+                    name: profile.name || 'Unnamed',
+                    phone: profile.phone,
+                    created_at: profile.created_at,
+                    totalOrders,
+                    totalSpent
+                };
+            });
+
+            setCustomers(customersWithStats);
+            setFilteredCustomers(customersWithStats);
+        } catch (error) {
+            console.error('Error loading customers:', error);
+            toast.error('Failed to load customers');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         let filtered = customers;
@@ -86,8 +80,7 @@ const CustomersManagement = () => {
             filtered = filtered.filter(
                 (customer) =>
                     customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    customer.phone.includes(searchQuery)
+                    customer.phone?.includes(searchQuery)
             );
         }
 
@@ -100,9 +93,18 @@ const CustomersManagement = () => {
     };
 
     const totalCustomers = customers.length;
-    const activeCustomers = customers.filter((c) => c.status === 'active').length;
+    const activeCustomers = customers.filter((c) => c.totalOrders > 0).length;
     const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0);
-    const avgOrderValue = totalRevenue / customers.reduce((sum, c) => sum + c.totalOrders, 0) || 0;
+    const totalOrders = customers.reduce((sum, c) => sum + c.totalOrders, 0);
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -157,7 +159,7 @@ const CustomersManagement = () => {
                     <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search by name, email, or phone..."
+                            placeholder="Search by name or phone..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-8"
@@ -169,49 +171,57 @@ const CustomersManagement = () => {
             {/* Customers Table */}
             <Card>
                 <CardContent className="pt-6">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Customer</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>Total Orders</TableHead>
-                                <TableHead>Total Spent</TableHead>
-                                <TableHead>Join Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredCustomers.map((customer) => (
-                                <TableRow key={customer.id}>
-                                    <TableCell>
-                                        <div>
-                                            <div className="font-medium">{customer.name}</div>
-                                            <div className="text-sm text-muted-foreground">{customer.email}</div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{customer.phone}</TableCell>
-                                    <TableCell>{customer.totalOrders}</TableCell>
-                                    <TableCell>₹{customer.totalSpent}</TableCell>
-                                    <TableCell>{new Date(customer.joinDate).toLocaleDateString()}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                                            {customer.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleViewCustomer(customer)}
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                    </TableCell>
+                    {filteredCustomers.length === 0 ? (
+                        <div className="text-center py-12">
+                            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                            <p className="text-muted-foreground">No customers found</p>
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Customer</TableHead>
+                                    <TableHead>Phone</TableHead>
+                                    <TableHead>Total Orders</TableHead>
+                                    <TableHead>Total Spent</TableHead>
+                                    <TableHead>Join Date</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredCustomers.map((customer) => (
+                                    <TableRow key={customer.id}>
+                                        <TableCell>
+                                            <div className="font-medium">{customer.name}</div>
+                                        </TableCell>
+                                        <TableCell>{customer.phone || 'N/A'}</TableCell>
+                                        <TableCell>{customer.totalOrders}</TableCell>
+                                        <TableCell>₹{customer.totalSpent}</TableCell>
+                                        <TableCell>
+                                            {customer.created_at 
+                                                ? format(new Date(customer.created_at), 'MMM dd, yyyy')
+                                                : 'N/A'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={customer.totalOrders > 0 ? 'default' : 'secondary'}>
+                                                {customer.totalOrders > 0 ? 'Active' : 'Inactive'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleViewCustomer(customer)}
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
 
@@ -229,16 +239,16 @@ const CustomersManagement = () => {
                                     <p className="text-sm text-muted-foreground">{selectedCustomer.name}</p>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium">Email</label>
-                                    <p className="text-sm text-muted-foreground">{selectedCustomer.email}</p>
-                                </div>
-                                <div>
                                     <label className="text-sm font-medium">Phone</label>
-                                    <p className="text-sm text-muted-foreground">{selectedCustomer.phone}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {selectedCustomer.phone || 'Not provided'}
+                                    </p>
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium">Status</label>
-                                    <p className="text-sm text-muted-foreground capitalize">{selectedCustomer.status}</p>
+                                    <p className="text-sm text-muted-foreground capitalize">
+                                        {selectedCustomer.totalOrders > 0 ? 'Active' : 'Inactive'}
+                                    </p>
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium">Total Orders</label>
@@ -251,7 +261,9 @@ const CustomersManagement = () => {
                                 <div>
                                     <label className="text-sm font-medium">Join Date</label>
                                     <p className="text-sm text-muted-foreground">
-                                        {new Date(selectedCustomer.joinDate).toLocaleDateString()}
+                                        {selectedCustomer.created_at
+                                            ? format(new Date(selectedCustomer.created_at), 'PPP')
+                                            : 'N/A'}
                                     </p>
                                 </div>
                                 <div>
@@ -260,6 +272,12 @@ const CustomersManagement = () => {
                                         ₹{selectedCustomer.totalOrders > 0
                                             ? (selectedCustomer.totalSpent / selectedCustomer.totalOrders).toFixed(0)
                                             : 0}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium">Customer ID</label>
+                                    <p className="text-xs text-muted-foreground font-mono">
+                                        {selectedCustomer.id}
                                     </p>
                                 </div>
                             </div>
