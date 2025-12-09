@@ -20,6 +20,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, phoneNumber?: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
-        
+
         if (session?.user) {
           // Defer profile fetch to avoid blocking auth state changes
           setTimeout(async () => {
@@ -49,13 +50,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .select('*')
                 .eq('id', session.user.id)
                 .maybeSingle();
-              
+
               if (error) {
                 console.error('Profile fetch error:', error);
               }
-              
+
               console.log('Profile fetch result:', profile);
-              
+
               setUser({
                 id: session.user.id,
                 name: profile?.name || session.user.email?.split('@')[0] || '',
@@ -110,7 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     cleanupAuthState();
     try {
       await supabase.auth.signOut({ scope: 'global' });
-    } catch {}
+    } catch { }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -131,7 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     cleanupAuthState();
     try {
       await supabase.auth.signOut({ scope: 'global' });
-    } catch {}
+    } catch { }
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -190,6 +191,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     throw lastError;
   };
 
+  const loginWithGoogle = async (): Promise<void> => {
+    cleanupAuthState();
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch { }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       cleanupAuthState();
@@ -208,6 +231,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     login,
     register,
+    loginWithGoogle,
     logout,
     isAuthenticated: !!session?.user,
   };
