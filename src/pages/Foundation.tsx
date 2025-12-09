@@ -54,10 +54,7 @@ const Foundation = () => {
             <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-background py-20">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-                        <Sparkles className="h-4 w-4" />
-                        <span className="text-sm font-medium">Welcome {user?.name || 'Guest'}</span>
-                    </div>
+
                     <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
                         Kapalin Gita's Foundation
                     </h1>

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import lasaImage from '@/assets/lasa.png';
+import lasaImage from '@/assets/Logo.jpg';
 
 const Footer = () => {
     const [email, setEmail] = useState('');
@@ -33,12 +33,12 @@ const Footer = () => {
         setEmail('');
     };
 
-const socialStats = [
-    { icon: Instagram, count: '4K+', label: 'Followers', color: 'text-pink-500', url: 'https://www.instagram.com/kapalingitatales?igsh=ajl0MDg4cGhycnJq' },
-    { icon: Youtube, count: '2K+', label: 'Subscribers', color: 'text-red-500', url: 'https://www.youtube.com/@YourChannelName' },
-    { icon: Facebook, count: '1K+', label: 'Likes', color: 'text-blue-500', url: 'https://www.facebook.com/share/1CLAXpeC6x/' },
-    { icon: Twitter, count: '800+', label: 'Followers', color: 'text-sky-500', url: 'https://x.com/YourTwitterHandle' },
-];
+    const socialStats = [
+        { icon: Instagram, count: '4K+', label: 'Followers', color: 'text-pink-500', url: 'https://www.instagram.com/kapalingitatales?igsh=ajl0MDg4cGhycnJq' },
+        { icon: Youtube, count: '2K+', label: 'Subscribers', color: 'text-red-500', url: 'https://www.youtube.com/@YourChannelName' },
+        { icon: Facebook, count: '1K+', label: 'Likes', color: 'text-blue-500', url: 'https://www.facebook.com/share/1CLAXpeC6x/' },
+        { icon: Twitter, count: '800+', label: 'Followers', color: 'text-sky-500', url: 'https://x.com/YourTwitterHandle' },
+    ];
 
     const communityStats = [
         { icon: Users, count: '10,000+', label: 'Active Readers' },
@@ -106,29 +106,7 @@ const socialStats = [
                             ))}
                         </div>
 
-                        {/* Testimonial */}
-                        {/* <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-700/30 max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16">
-                            <div className="flex items-center justify-center mb-6">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-0.5">
-                                    <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face"
-                                            alt="Sarah M."
-                                            className="w-14 h-14 rounded-full object-cover"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <blockquote className="text-xl md:text-2xl font-medium text-slate-200 mb-4 italic">
-                                "This platform is incredibly relevant to today's world. The books here have transformed my perspective and connected me with like-minded readers."
-                            </blockquote>
-                            <cite className="text-slate-400 font-medium">— Sarah M., Community Member</cite>
-                            <div className="flex justify-center mt-4">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                                ))}
-                            </div>
-                        </div> */}
+
                     </div>
                 </div>
 
@@ -154,26 +132,7 @@ const socialStats = [
                                     Join our community of book lovers and embark on endless adventures.
                                 </p>
 
-                                {/* Newsletter Signup */}
-                                <div className="mb-4 sm:mb-6">
-                                    <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Stay Updated</h4>
-                                    <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-2">
-                                        <Input
-                                            type="email"
-                                            placeholder="Enter your email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 text-sm sm:text-base"
-                                            required
-                                        />
-                                        <Button
-                                            type="submit"
-                                            className="bg-gradient-to-r from-yellow-500  hover:from-blue-600 hover:to-purple-600 whitespace-nowrap text-sm sm:text-base px-4 sm:px-6"
-                                        >
-                                            Subscribe
-                                        </Button>
-                                    </form>
-                                </div>
+
                             </div>
 
                             {/* Quick Links */}
